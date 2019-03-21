@@ -52,21 +52,25 @@ class SSP{
             $req = $this->request;
             $cdtk = $this->cols_dt_k;            
             
-            $obj_model = ($this->model)::select($this->cols_arr);
-            $this->total_count = $obj_model->count();
-            
+            if(!empty($req['draw']) && !empty($req['order']) && !empty($req['start']) && !empty($req['length'])){
+                $obj_model = ($this->model)::select($this->cols_arr);
+                $this->total_count = $obj_model->count();
+                
 
-            if(!empty($req['search']['value'])){
-                $obj_model = $obj_model->where(DB::raw($this->col_search), 'LIKE', '%'.$req['search']['value'].'%');
-                $this->filter_count = $obj_model->count();
+                if(!empty($req['search']['value'])){
+                    $obj_model = $obj_model->where(DB::raw($this->col_search), 'LIKE', '%'.$req['search']['value'].'%');
+                    $this->filter_count = $obj_model->count();
+                }else{
+                    $this->filter_count = $this->total_count;
+                }
+                
+                $obj_model = $obj_model->orderBy($cdtk[$req['order'][0]['column']]['db'], $req['order'][0]['dir']);
+                
+                $obj_model = $obj_model->offset($req['start'])->limit($req['length']);
+                $this->normal_data = $obj_model->get()->toArray();
             }else{
-                $this->filter_count = $this->total_count;
+                $this->normal_data = [];
             }
-            
-            $obj_model = $obj_model->orderBy($cdtk[$req['order'][0]['column']]['db'], $req['order'][0]['dir']);
-            
-            $obj_model = $obj_model->offset($req['start'])->limit($req['length']);
-            $this->normal_data = $obj_model->get()->toArray();
         }
         
         return $this->normal_data;
@@ -90,7 +94,7 @@ class SSP{
             }
             
             $this->dt_arr = [
-                'draw' => $req['draw'],
+                'draw' => $req['draw'] ?? 0,
                 'recordsTotal' => $this->total_count,
                 'recordsFiltered' => $this->filter_count,
                 'data' => $ret_data,
