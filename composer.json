@@ -1,0 +1,13 @@
+{
+    "name": "syamsoulcc/laravel-datatable-ssp",
+    "description": "DataTable SSP (PHP) for Laravel",
+    "type": "laravel-package",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Syamsoul Azrien Muda",
+            "email": "syamsoulazrien.miat@gmail.com"
+        }
+    ],
+    "require": {}
+}
