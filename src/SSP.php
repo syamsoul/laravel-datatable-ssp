@@ -34,7 +34,6 @@ class SSP{
         $this->cols     = $cols;
         $this->cols_db_k   = array_combine(array_column($cols, 'db'), $cols);
         $this->cols_dt_k   = array_combine(array_column($cols, 'dt'), $cols);
-        
 
         foreach($cols as $e_key => $e_col){
             array_push($this->cols_arr, $e_col['db']);
@@ -82,13 +81,14 @@ class SSP{
             $req = $this->request;
             
             $n_data = $this->getNormalData();
+            $e_cdtk = $this->cols_dt_k;
             
             foreach($n_data as $e_key => $e_ndat){
-                foreach($e_ndat as $ee_key => $ee_val){
-                    $e_ck = $this->cols_db_k[$ee_key];
-                    if(isset($e_ck['dt']) && is_numeric($e_ck['dt'])){
-                        if(isset($e_ck['formatter']) && is_callable($e_ck['formatter'])) $ret_data[$e_key][$e_ck['dt']] = $e_ck['formatter'](['value'=>$ee_val, 'data'=>$e_ndat]);
-                        else $ret_data[$e_key][$e_ck['dt']] = $ee_val;
+                foreach($e_cdtk as $ee_key => $ee_val){
+                    if(is_numeric($ee_key)){
+                        $the_val = $e_ndat[$ee_val['db']];
+                        if(isset($ee_val['formatter']) && is_callable($ee_val['formatter'])) $ret_data[$e_key][$ee_key] = $ee_val['formatter'](['value'=>$the_val, 'data'=>$e_ndat]);
+                        else $ret_data[$e_key][$ee_key] = $the_val;
                     }
                 }
             }
