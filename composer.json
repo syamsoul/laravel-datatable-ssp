@@ -18,7 +18,7 @@
             "email": "syamsoulazrien.miat@gmail.com"
         }
     ],
-    "minimum-stability": "1.0",
+    "minimum-stability": "stable",
     "require": {
         "php": ">=5.5.0"
     },
