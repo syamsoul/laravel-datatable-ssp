@@ -52,7 +52,7 @@ class SSP{
             $req = $this->request;
             $cdtk = $this->cols_dt_k;            
             
-            if(!empty($req['draw']) && !empty($req['order']) && !empty($req['start']) && !empty($req['length'])){
+            if(isset($req['draw']) && isset($req['order']) && isset($req['start']) && isset($req['length'])){
                 $obj_model = ($this->model)::select($this->cols_arr);
                 $this->total_count = $obj_model->count();
                 
