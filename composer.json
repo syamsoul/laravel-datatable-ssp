@@ -9,5 +9,6 @@
             "email": "syamsoulazrien.miat@gmail.com"
         }
     ],
+    "minimum-stability": "dev",
     "require": {}
 }
