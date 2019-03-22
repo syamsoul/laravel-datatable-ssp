@@ -17,6 +17,7 @@ class SSP{
     
     private $model;
     private $request;
+    private $labels=[];
     private $cols;
     private $cols_db_k;
     private $cols_dt_k;
@@ -31,18 +32,34 @@ class SSP{
     function __construct($model, $cols){
         $this->model    = $model;
         $this->request  = request()->all();
+    
+        foreach($cols as $e_key => $e_col){
+            array_push($this->cols_arr, $e_col['db']);
+            if(!isset($e_col['dt'])) $cols[$e_key]['dt'] = null; 
+        }
+        
         $this->cols     = $cols;
         $this->cols_db_k   = array_combine(array_column($cols, 'db'), $cols);
         $this->cols_dt_k   = array_combine(array_column($cols, 'dt'), $cols);
-
-        foreach($cols as $e_key => $e_col){
-            array_push($this->cols_arr, $e_col['db']);
-            if(isset($e_col['dt']) && is_numeric($e_col['dt'])){
+        
+        ksort($this->cols_dt_k);
+        
+        foreach($this->cols_dt_k as $e_key => $e_col){
+            if(is_numeric($e_col['dt'])){
                 array_push($this->cols_exc_arr, $e_col['db']);
-            }
+                array_push($this->labels, $e_col['label']);
+            }else unset($this->cols_dt_k[$e_key]);
         }
         
         $this->col_search = "CONCAT(`".implode($this->cols_exc_arr, "`,' ',`")."`)";// AS `sd_dt_search_col`";
+    }
+    
+    public function getLabels($return_json=false){
+        $ret = [];
+        foreach($this->labels as $key=>$val) array_push($ret, ['title'=>$val]);
+        
+        if($return_json) return json_encode($ret);
+        return $ret;
     }
     
     public function getNormalData(){
