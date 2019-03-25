@@ -19,7 +19,7 @@ class SSP{
     private $request;
     private $labels=[];
     private $cols;
-    private $cols_db_k;
+    //private $cols_db_k;
     private $cols_dt_k;
     private $cols_arr=[];
     private $cols_exc_arr=[];
@@ -34,19 +34,19 @@ class SSP{
         $this->request  = request()->all();
     
         foreach($cols as $e_key => $e_col){
-            array_push($this->cols_arr, $e_col['db']);
+            if(isset($e_col['db'])) array_push($this->cols_arr, $e_col['db']);
             if(!isset($e_col['dt'])) $cols[$e_key]['dt'] = null; 
         }
         
         $this->cols     = $cols;
-        $this->cols_db_k   = array_combine(array_column($cols, 'db'), $cols);
+        //$this->cols_db_k   = array_combine(array_column($cols, 'db'), $cols);
         $this->cols_dt_k   = array_combine(array_column($cols, 'dt'), $cols);
         
         ksort($this->cols_dt_k);
         
         foreach($this->cols_dt_k as $e_key => $e_col){
             if(is_numeric($e_col['dt'])){
-                array_push($this->cols_exc_arr, $e_col['db']);
+                if(isset($e_col['db'])) array_push($this->cols_exc_arr, $e_col['db']);
                 array_push($this->labels, $e_col['label']);
             }else unset($this->cols_dt_k[$e_key]);
         }
@@ -103,7 +103,7 @@ class SSP{
             foreach($n_data as $e_key => $e_ndat){
                 foreach($e_cdtk as $ee_key => $ee_val){
                     if(is_numeric($ee_key)){
-                        $the_val = $e_ndat[$ee_val['db']];
+                        if(isset($ee_val['db'])) $the_val = $e_ndat[$ee_val['db']];
                         if(isset($ee_val['formatter']) && is_callable($ee_val['formatter'])) $ret_data[$e_key][$ee_key] = $ee_val['formatter'](['value'=>$the_val, 'data'=>$e_ndat]);
                         else $ret_data[$e_key][$ee_key] = $the_val;
                     }
