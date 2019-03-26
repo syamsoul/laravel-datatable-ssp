@@ -83,9 +83,9 @@ class SSP{
                 $obj_model = $obj_model->orderBy($cdtk[$req['order'][0]['column']]['db'], $req['order'][0]['dir']);
                 
                 $obj_model = $obj_model->offset($req['start'])->limit($req['length']);
-                $this->normal_data = $obj_model->get()->toArray();
+                $this->normal_data = $obj_model->get();
             }else{
-                $this->normal_data = [];
+                $this->normal_data = false;
             }
         }
         
@@ -97,15 +97,18 @@ class SSP{
         if(empty($this->dt_arr)){
             $req = $this->request;
             
-            $n_data = $this->getNormalData();
+            $m_data = $this->getNormalData();
             $e_cdtk = $this->cols_dt_k;
             
-            foreach($n_data as $e_key => $e_ndat){
-                foreach($e_cdtk as $ee_key => $ee_val){
-                    if(is_numeric($ee_key)){
-                        if(isset($ee_val['db'])) $the_val = $e_ndat[$ee_val['db']];
-                        if(isset($ee_val['formatter']) && is_callable($ee_val['formatter'])) $ret_data[$e_key][$ee_key] = $ee_val['formatter'](['value'=>$the_val, 'data'=>$e_ndat]);
-                        else $ret_data[$e_key][$ee_key] = $the_val;
+            if(!empty($m_data)){
+                $n_data = $m_data->toArray();
+                foreach($n_data as $e_key => $e_ndat){
+                    foreach($e_cdtk as $ee_key => $ee_val){
+                        if(is_numeric($ee_key)){
+                            if(isset($ee_val['db'])) $the_val = $e_ndat[$ee_val['db']];
+                            if(isset($ee_val['formatter']) && is_callable($ee_val['formatter'])) $ret_data[$e_key][$ee_key] = $ee_val['formatter'](['value'=>$the_val, 'data'=>$e_ndat, 'model'=>$m_data[$e_key]]);
+                            else $ret_data[$e_key][$ee_key] = $the_val;
+                        }
                     }
                 }
             }
