@@ -28,6 +28,7 @@ class SSP{
     private $col_search;
     private $total_count;
     private $filter_count;
+    private $order;
     
     function __construct($model, $cols){
         $this->model    = $model;
@@ -54,11 +55,13 @@ class SSP{
         $this->col_search = "CONCAT(`".implode($this->cols_exc_arr, "`,' ',`")."`)";// AS `sd_dt_search_col`";
     }
     
-    public function getLabels($return_json=false){
-        $ret = [];
-        foreach($this->labels as $key=>$val) array_push($ret, ['title'=>$val]);
+    public function getInfo(){
+        $ret = [
+            'labels'    => [],
+            'order'     => $this->order ?? [[0, 'asc']],
+        ];
+        foreach($this->labels as $key=>$val) array_push($ret['labels'], ['title'=>$val]);
         
-        if($return_json) return json_encode($ret);
         return $ret;
     }
     
@@ -122,6 +125,16 @@ class SSP{
         }
         
         return $this->dt_arr;
+    }
+    
+    public function order($dt, $sort){
+        $this->order = [[$dt, $sort]];
+        
+        return $this;
+    }
+    
+    public function sort($dt, $sort){
+        return $this->order($dt, $sort);
     }
 }
 
