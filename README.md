@@ -38,8 +38,14 @@ composer require syamsoulcc/laravel-datatable-ssp
 
 ## Usage & Example
 
-First, add the `use SoulDoit\DataTable\SSP;` to your Controller:
+Add `use SoulDoit\DataTable\SSP;` to your Controller:
 
+
+And that's it!
+You can use it now. You can refer to the example below.
+
+
+### In PHP
 ```php
 namespace App\Http\Controllers\AdminPanel;
 
@@ -49,8 +55,73 @@ use SoulDoit\DataTable\SSP;
 
 class UsersController extends Controller
 {
+    public function list()
+    {        
+        $dt_obj = $this->dtSsp();
+        
+        return view('admin-panel.users-list', [
+            'dt_info'       => $dt_obj->getInfo(),
+        ]);
+    }
+    
+    
+    public function get($id=null)
+    {
+        $dt_obj = $this->dtSsp();
+        
+        return response()->json($dt_obj->getDtArr());
+    }
+    
+	private function dtSsp(){
+        $dt = [
+            ['label'=>'ID',         'db'=>'id',            'dt'=>0, 'formatter'=>function($obj){ return str_pad($$obj['value'], 5, '0', STR_PAD_LEFT); }],
+            ['label'=>'Email',      'db'=>'email',         'dt'=>2],
+            ['label'=>'Username',   'db'=>'name',          'dt'=>1],
+            ['label'=>'Created At', 'db'=>'created_at',    'dt'=>3],
+            ['label'=>'Action',     'db'=>'id',            'dt'=>4, 'formatter'=>function($obj){ 
+                $btns = [
+                    '<button onclick="edit(\''.$obj['value'].'\');">Edit</button>',
+                    '<button onclick="delete(\''.$obj['value'].'\');">Delete</button>',
+                ];
+                return implode($btns, " "); 
+            }],
+            ['db'=>'email_verified_at'],
+        ];
+        return (new SSP('\App\User', $dt))->order(0, 'desc');
+    }
+}
 ```
 
+### In Blade
+```blade
+<html>
+    <head>
+        <title>Laravel DataTable SSP</title>
+    </head>
+    <body>
+        <table id="datatable_1" class="table table-striped table-bordered" style="width:100%;"></table>
+        <script>
+            $(document).ready(function(){
+                $('#datatable_1').DataTable({
+                    processing: true,
+                    serverSide: true,
+                    ajax: 'http://your-website.com/users/get',
+                    columns: {!!json_encode($dt_info['labels'])!!},
+                    order: {!!json_encode($dt_info['order'])!!},
+                });
+            });
+            
+            function edit(id){
+                alert('edit for user with id '+id);
+            }
+            
+            function delete(id){
+                alert('delete user with id '+id);
+            }
+        </script>
+    </body>
+</html>    
+```
 
 ## Support me
 
