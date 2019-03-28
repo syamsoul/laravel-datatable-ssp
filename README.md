@@ -9,7 +9,7 @@
 This package allows you to manage your DataTable from server-side in Laravel app (inspired by [original DataTable SSP](https://github.com/DataTables/DataTablesSrc/blob/master/examples/server_side/scripts/ssp.class.php)).
 
 
-You can refer [here]([https://datatables.net/examples/data_sources/server_side](https://datatables.net/examples/data_sources/server_side)) about the implementation of original DataTable SSP.
+You can refer [here](https://datatables.net/examples/data_sources/server_side) about the implementation of original DataTable SSP.
 
 
 ## Content List
@@ -60,4 +60,4 @@ Please [make a donation](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&bu
 
 ## License
 
-The MIT License (MIT). Please see [License File](LICENSE.md) for more information.
+The MIT License (MIT). Please see [License File](LICENSE) for more information.
