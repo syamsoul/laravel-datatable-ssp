@@ -17,7 +17,7 @@ class SSP{
     
     private $model;
     private $request;
-    private $labels=[];
+    private $cols_info=[];
     private $cols;
     //private $cols_db_k;
     private $cols_dt_k;
@@ -48,7 +48,7 @@ class SSP{
         foreach($this->cols_dt_k as $e_key => $e_col){
             if(is_numeric($e_col['dt'])){
                 if(isset($e_col['db'])) array_push($this->cols_exc_arr, $e_col['db']);
-                array_push($this->labels, $e_col['label']);
+                array_push($this->cols_info, ['label'=>($e_col['label'] ?? ""), 'class'=>($e_col['class'] ?? "")]);
             }else unset($this->cols_dt_k[$e_key]);
         }
         
@@ -60,7 +60,7 @@ class SSP{
             'labels'    => [],
             'order'     => $this->order ?? [[0, 'asc']],
         ];
-        foreach($this->labels as $key=>$val) array_push($ret['labels'], ['title'=>$val]);
+        foreach($this->cols_info as $key=>$val) array_push($ret['labels'], ['title'=>$val['label'], 'className'=>$val['class']]);
         
         return $ret;
     }
