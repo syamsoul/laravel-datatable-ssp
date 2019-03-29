@@ -1,3 +1,4 @@
+
 # DataTable SSP (PHP) for Laravel
 
 
@@ -13,12 +14,13 @@ You can refer [here](https://datatables.net/examples/data_sources/server_side) a
 
 
 &nbsp;
-&nbsp;
-## Content List
 * [Requirement](#requirement)
 * [Installation](#installation)
 * [Usage & Reference](#usage--reference)
+  * [How to use it?](#how-to-use-it)
 * [Example](#example)
+  * [In PHP (Controller)](#in-php-controller)
+  * [In Blade (Views)](#in-blade-views)
 
 
 &nbsp;
@@ -45,12 +47,12 @@ composer require syamsoulcc/laravel-datatable-ssp
 &nbsp;
 ## Usage & Reference
 
-\* Before you read this section, you can take a look [the example below](#example) to clearly understand.
+\* Before you read this section, you can take a look [the example below](#example) to make it more clear to understand.
 
 &nbsp;
 ### How to use it?
 
-Firstly, you must add this line to your Controller:
+First, you must add this line to your Controller:
 ```php
 use SoulDoit\DataTable\SSP;
 ```
@@ -58,8 +60,23 @@ use SoulDoit\DataTable\SSP;
 
 And then create a new SSP instance:
 ```php
-$my_ssp = new SSP(String $model, Array $datatable);
+$my_ssp = new SSP(String $model, Array $dt_cols_opt);
 ```
+
+Which is:
+* `$model` is a string of your model name, for example:
+    ```php
+    $model = '\App\User';
+  ```
+* `$dt_cols_opt` is an array of your columns' options, for example:
+   ```php
+   $dt_cols_opt = [
+       ['label'=>'ID',         'db'=>'id',            'dt'=>0, 'formatter'=>function($obj){ return str_pad($$obj['value'], 5, '0', STR_PAD_LEFT); }],
+       ['label'=>'Username',   'db'=>'uname',          'dt'=>1],
+       ['label'=>'Email',      'db'=>'email',         'dt'=>2],
+       ['label'=>$dt_col_header,      'db'=>$db_col_name,         'dt'=>$dt_col_position],
+   ];
+   ```
 
 &nbsp;
 &nbsp;
@@ -97,7 +114,7 @@ class UsersController extends Controller
         $dt = [
             ['label'=>'ID',         'db'=>'id',            'dt'=>0, 'formatter'=>function($obj){ return str_pad($$obj['value'], 5, '0', STR_PAD_LEFT); }],
             ['label'=>'Email',      'db'=>'email',         'dt'=>2],
-            ['label'=>'Username',   'db'=>'name',          'dt'=>1],
+            ['label'=>'Username',   'db'=>'uname',          'dt'=>1],
             ['label'=>'Created At', 'db'=>'created_at',    'dt'=>3],
             ['label'=>'Action',     'db'=>'id',            'dt'=>4, 'formatter'=>function($obj){ 
                 $btns = [
@@ -114,7 +131,7 @@ class UsersController extends Controller
 ```
 
 &nbsp;
-### In Blade
+### In Blade (Views)
 ```blade
 <html>
     <head>
