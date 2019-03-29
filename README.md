@@ -12,18 +12,24 @@ This package allows you to manage your DataTable from server-side in Laravel app
 You can refer [here](https://datatables.net/examples/data_sources/server_side) about the implementation of original DataTable SSP.
 
 
+&nbsp;
+&nbsp;
 ## Content List
 * [Requirement](#requirement)
 * [Installation](#installation)
-* [Usage & Example](#usage--example)
+* [Usage & Reference](#usage--reference)
+* [Example](#example)
 
 
+&nbsp;
+&nbsp;
 ## Requirement
 
 * Currently only tested in Laravel 5.8 (and it works perfectly)
 
 
-
+&nbsp;
+&nbsp;
 ## Installation
 
 
@@ -35,17 +41,32 @@ You can install the package via composer:
 composer require syamsoulcc/laravel-datatable-ssp
 ```
 
+&nbsp;
+&nbsp;
+## Usage & Reference
 
-## Usage & Example
+\* Before you read this section, you can take a look [the example below](#example) to clearly understand.
 
-Add `use SoulDoit\DataTable\SSP;` to your Controller:
+&nbsp;
+### How to use it?
+
+Firstly, you must add this line to your Controller:
+```php
+use SoulDoit\DataTable\SSP;
+```
+&nbsp;
+
+And then create a new SSP instance:
+```php
+$my_ssp = new SSP(String $model, Array $datatable);
+```
+
+&nbsp;
+&nbsp;
+## Example
 
 
-And that's it!
-You can use it now. You can refer to the example below.
-
-
-### In PHP
+### In PHP (Controller)
 ```php
 namespace App\Http\Controllers\AdminPanel;
 
@@ -92,6 +113,7 @@ class UsersController extends Controller
 }
 ```
 
+&nbsp;
 ### In Blade
 ```blade
 <html>
@@ -123,12 +145,19 @@ class UsersController extends Controller
 </html>    
 ```
 
+&nbsp;
+&nbsp;
 ## Support me
 
 I am a passionate programmer. Please support me and I will continue to contribute my code to the world to make the  world better. :')
 
 Please [make a donation](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=syamsoulazrien.miat@gmail.com&lc=US&item_name=Support%20me%20and%20I%20will%20contribute%20more&no_note=0&cn=&curency_code=USD&bn=PP-DonationsBF:btn_donateCC_LG.gif:NonHosted). :')
 
+&#35;MalaysiaBoleh
+&#35;HidupMelayu
+
+&nbsp;
+&nbsp;
 ## License
 
 The MIT License (MIT). Please see [License File](LICENSE) for more information.
