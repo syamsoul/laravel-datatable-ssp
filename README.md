@@ -110,7 +110,8 @@ class UsersController extends Controller
         return response()->json($dt_obj->getDtArr());
     }
     
-	private function dtSsp(){
+	private function dtSsp()
+    {
         $dt = [
             ['label'=>'ID',         'db'=>'id',            'dt'=>0, 'formatter'=>function($obj){ return str_pad($$obj['value'], 5, '0', STR_PAD_LEFT); }],
             ['label'=>'Email',      'db'=>'email',         'dt'=>2],
@@ -171,6 +172,7 @@ I am a passionate programmer. Please support me and I will continue to contribut
 Please [make a donation](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=syamsoulazrien.miat@gmail.com&lc=US&item_name=Support%20me%20and%20I%20will%20contribute%20more&no_note=0&cn=&curency_code=USD&bn=PP-DonationsBF:btn_donateCC_LG.gif:NonHosted). :')
 
 &#35;MalaysiaBoleh
+
 &#35;HidupMelayu
 
 &nbsp;
