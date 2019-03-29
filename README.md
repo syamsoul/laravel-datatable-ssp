@@ -110,7 +110,8 @@ class UsersController extends Controller
         return response()->json($dt_obj->getDtArr());
     }
     
-	private function dtSsp()
+    
+    private function dtSsp()
     {
         $dt = [
             ['label'=>'ID',         'db'=>'id',            'dt'=>0, 'formatter'=>function($obj){ return str_pad($$obj['value'], 5, '0', STR_PAD_LEFT); }],
