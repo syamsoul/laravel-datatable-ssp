@@ -65,18 +65,63 @@ $my_ssp = new SSP(String $model, Array $dt_cols_opt);
 
 Which is:
 * `$model` is a string of your model name, for example:
-    ```php
-    $model = '\App\User';
+  ```php
+  $model = '\App\User';
   ```
 * `$dt_cols_opt` is an array of your columns' options, for example:
    ```php
    $dt_cols_opt = [
        ['label'=>'ID',         'db'=>'id',            'dt'=>0, 'formatter'=>function($obj){ return str_pad($$obj['value'], 5, '0', STR_PAD_LEFT); }],
-       ['label'=>'Username',   'db'=>'uname',          'dt'=>1],
+       ['label'=>'Username',   'db'=>'uname',         'dt'=>1],
        ['label'=>'Email',      'db'=>'email',         'dt'=>2],
-       ['label'=>$dt_col_header,      'db'=>$db_col_name,         'dt'=>$dt_col_position],
    ];
    ```
+&nbsp;
+
+The available columns' options are as below:
+```php
+[   
+    'label'         => $dt_col_header,
+    'db'            => $db_col_name,
+    'dt'            => $dt_col_position,
+    'class'         => $dt_class,
+    'formatter'     => $dt_formatter,
+],
+```
+
+Which is:
+* `$dt_col_header` is the header of the column (at the table in views/blade), for example:
+    ```php
+    $dt_col_header = 'Username';
+    ```
+* `$db_col_name` is column name based on the DB, for example:
+    ```php
+    $db_col_name = 'uname';
+    ```
+* `$dt_col_position` is the position of the column (at the table in views/blade), start with 0, for example:
+    ```php
+    $dt_col_position = 2;
+    ```
+* `$dt_class` is a class/classes name which will be added to the table (in views/blade), for example:
+    ```php
+    $dt_class = 'text-center text-bold';
+    ```
+* `$dt_formatter` is like a modifier that can modify the data from DB to be shown in views/blade, for example:
+    ```php
+    $dt_formatter = function($obj){
+        return ucwords($obj['value']); 
+        // which is 'value' is the value of the column
+        
+        // or
+        return $obj['value'] . '(#' .$obj['data']['id']. ')';
+        // which is 'data' is an associative array that store other columns' data for current row (e.g `id`, `created_at`)
+        // NOTE: if you want to get another column's data, you must include it in $dt_cols_opt. If you not include it, the data cannot be retrive in 'data'
+        
+        // or
+        return $obj['model']->formatted_uname();
+        // which is 'model' is the model of the current row
+    };
+    ```
 
 &nbsp;
 &nbsp;
