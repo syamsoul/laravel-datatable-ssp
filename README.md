@@ -71,7 +71,7 @@ Which is:
 * `$dt_cols_opt` is an array of your columns' options, for example:
    ```php
    $dt_cols_opt = [
-       ['label'=>'ID',         'db'=>'id',            'dt'=>0, 'formatter'=>function($obj){ return str_pad($$obj['value'], 5, '0', STR_PAD_LEFT); }],
+       ['label'=>'ID',         'db'=>'id',            'dt'=>0, 'formatter'=>function($obj){ return str_pad($obj['value'], 5, '0', STR_PAD_LEFT); }],
        ['label'=>'Username',   'db'=>'uname',         'dt'=>1],
        ['label'=>'Email',      'db'=>'email',         'dt'=>2],
    ];
@@ -159,9 +159,9 @@ class UsersController extends Controller
     private function dtSsp()
     {
         $dt = [
-            ['label'=>'ID',         'db'=>'id',            'dt'=>0, 'formatter'=>function($obj){ return str_pad($$obj['value'], 5, '0', STR_PAD_LEFT); }],
+            ['label'=>'ID',         'db'=>'id',            'dt'=>0, 'formatter'=>function($obj){ return str_pad($obj['value'], 5, '0', STR_PAD_LEFT); }],
             ['label'=>'Email',      'db'=>'email',         'dt'=>2],
-            ['label'=>'Username',   'db'=>'uname',          'dt'=>1],
+            ['label'=>'Username',   'db'=>'uname',         'dt'=>1],
             ['label'=>'Created At', 'db'=>'created_at',    'dt'=>3],
             ['label'=>'Action',     'db'=>'id',            'dt'=>4, 'formatter'=>function($obj){ 
                 $btns = [
