@@ -2,6 +2,7 @@
 namespace SoulDoit\DataTable;
 
 use DB;
+use App;
 
 class SSP{
     
