@@ -74,8 +74,8 @@ class SSP{
             $cdtk = $this->cols_dt_k;            
             
             if(isset($req['draw']) && isset($req['order']) && isset($req['start']) && isset($req['length'])){
-                if(empty($with_related_table)) $obj_model = ($this->model)::select($this->cols_arr);
-                else $obj_model = ($this->model)::with($with_related_table)->select($this->cols_arr);
+                if(empty($this->with_related_table)) $obj_model = ($this->model)::select($this->cols_arr);
+                else $obj_model = ($this->model)::with($this->with_related_table)->select($this->cols_arr);
                 
                 $this->total_count = $obj_model->count();
                 
@@ -132,7 +132,7 @@ class SSP{
     }
     
     public function with($related_table){
-        $with_related_table = $related_table;
+        $this->with_related_table = $related_table;
         
         return $this;
     }
