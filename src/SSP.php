@@ -29,6 +29,7 @@ class SSP{
     private $col_search;
     private $total_count;
     private $filter_count;
+    private $with_related_table;
     private $order;
     
     function __construct($model, $cols){
@@ -73,7 +74,9 @@ class SSP{
             $cdtk = $this->cols_dt_k;            
             
             if(isset($req['draw']) && isset($req['order']) && isset($req['start']) && isset($req['length'])){
-                $obj_model = ($this->model)::select($this->cols_arr);
+                if(empty($with_related_table)) $obj_model = ($this->model)::select($this->cols_arr);
+                else $obj_model = ($this->model)::with($with_related_table)->select($this->cols_arr);
+                
                 $this->total_count = $obj_model->count();
                 
 
@@ -126,6 +129,12 @@ class SSP{
         }
         
         return $this->dt_arr;
+    }
+    
+    public function with($related_table){
+        $with_related_table = $related_table;
+        
+        return $this;
     }
     
     public function order($dt, $sort){
