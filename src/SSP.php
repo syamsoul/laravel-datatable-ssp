@@ -29,6 +29,7 @@ class SSP{
     private $col_search;
     private $total_count;
     private $filter_count;
+    private $where_query=[];
     private $with_related_table;
     private $order;
     
@@ -76,6 +77,11 @@ class SSP{
             if(isset($req['draw']) && isset($req['order']) && isset($req['start']) && isset($req['length'])){
                 if(empty($this->with_related_table)) $obj_model = ($this->model)::select($this->cols_arr);
                 else $obj_model = ($this->model)::with($this->with_related_table)->select($this->cols_arr);
+                
+                if(!empty($this->where_query)) foreach($this->where_query as $e_qry){
+                    if($e_qry[0] == "and") $obj_model = $obj_model->where($e_qry[1]);
+                    elseif($e_qry[0] == "or") $obj_model = $obj_model->orWhere($e_qry[1]);
+                }
                 
                 $this->total_count = $obj_model->count();
                 
@@ -129,6 +135,46 @@ class SSP{
         }
         
         return $this->dt_arr;
+    }
+    
+    public function where(...$params){
+        $ret_query = false;
+        
+        if(is_callable($params[0])){
+            $ret_query = $params[0];
+        }elseif(count($params) == 2){
+            $ret_query = function($query) use($params){
+                $query->where($params[0], $params[1]);
+            };
+        }elseif(count($params) == 3){
+            $ret_query = function($query) use($params){
+                $query->where($params[0], $params[1], $params[2]);
+            };
+        }
+        
+        if($ret_query !== false) array_push($this->where_query, ['and', $ret_query]);
+        
+        return $this;
+    }
+    
+    public function orWhere(...$params){
+        $ret_query = false;
+        
+        if(is_callable($params[0])){
+            $ret_query = $params[0];
+        }elseif(count($params) == 2){
+            $ret_query = function($query) use($params){
+                $query->where($params[0], $params[1]);
+            };
+        }elseif(count($params) == 3){
+            $ret_query = function($query) use($params){
+                $query->where($params[0], $params[1], $params[2]);
+            };
+        }
+        
+        if($ret_query !== false) array_push($this->where_query, ['or', $ret_query]);
+        
+        return $this;
     }
     
     public function with($related_table){

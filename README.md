@@ -1,4 +1,5 @@
 
+
 # DataTable SSP (PHP) for Laravel
 
 
@@ -124,6 +125,35 @@ Which is:
     ```
 
 &nbsp;
+### Ordering/Sorting
+This is the default ordering for the first time the page is loaded.
+```
+$my_ssp->order($dt_col_position, $ordering);
+```
+
+Which is:
+* `$dt_col_position` is based on the `dt` value that you set in `$dt_cols_opt` (Please refer above).
+* `$ordering` only have two value whether `asc` or `desc`.
+
+&nbsp;
+### Where/OrWhere
+```
+$my_ssp->where($column_name, $column_value);
+
+// or
+
+$my_ssp->where($column_name, $column_value)->orWhere($column_name, $column_value);
+
+// or
+
+$my_ssp->where($query_function);
+```
+Which is:
+* `$column_name` is the column name based on the database.
+* `$column_value` is the value of the column.
+* `$query_function` is a normal Laravel's query function.
+
+&nbsp;
 &nbsp;
 ## Example
 
@@ -172,7 +202,10 @@ class UsersController extends Controller
             }],
             ['db'=>'email_verified_at'],
         ];
-        return (new SSP('\App\User', $dt))->order(0, 'desc');
+        return (new SSP('\App\User', $dt))->where('status','active')->where(function($query){
+            $query->where('id', '!=', 1);
+            $query->orWhere('uname', '!=', 'superadmin');
+        })->order(0, 'desc');
     }
 }
 ```
