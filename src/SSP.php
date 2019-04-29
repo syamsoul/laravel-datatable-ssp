@@ -95,7 +95,7 @@ class SSP{
                 
                 $obj_model = $obj_model->orderBy($cdtk[$req['order'][0]['column']]['db'], $req['order'][0]['dir']);
                 
-                $obj_model = $obj_model->offset($req['start'])->limit($req['length']);
+                if($req['length'] > -1) $obj_model = $obj_model->offset($req['start'])->limit($req['length']);
                 $this->normal_data = $obj_model->get();
             }else{
                 $this->normal_data = false;
