@@ -55,7 +55,7 @@ class SSP{
             }else unset($this->cols_dt_k[$e_key]);
         }
         
-        $this->col_search = "CONCAT(COALESCE(`".implode($this->cols_exc_arr, "`,''),' ',COALESCE(`")."`,''))";// AS `sd_dt_search_col`";
+        $this->col_search = "CONCAT(COALESCE(`".implode($this->cols_arr, "`,''),' ',COALESCE(`")."`,''))";// AS `sd_dt_search_col`";
     }
     
     public function getInfo(){
