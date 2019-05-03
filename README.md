@@ -2,7 +2,7 @@
 
 
 
-[![Latest Version on Packagist](https://img.shields.io/packagist/v/syamsoulcc/laravel-datatable-ssp.svg?style=flat-square)](https://packagist.org/packages/syamsoulcc/laravel-datatable-ssp)
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/syamsoul/laravel-datatable-ssp.svg?style=flat-square)](https://packagist.org/packages/syamsoul/laravel-datatable-ssp)
 
 
 
@@ -38,12 +38,12 @@ You can refer [here](https://datatables.net/examples/data_sources/server_side) a
 ## Installation
 
 
-This package can be used in Laravel 5.8 or higher. If you are using an older version of Laravel, there's might be some problem. If there's any problem, you can [create new issue](https://github.com/syamsoulcc/laravel-datatable-ssp/issues) and I will fix it as soon as possible.
+This package can be used in Laravel 5.8 or higher. If you are using an older version of Laravel, there's might be some problem. If there's any problem, you can [create new issue](https://github.com/syamsoul/laravel-datatable-ssp/issues) and I will fix it as soon as possible.
 
 You can install the package via composer:
 
 ``` bash
-composer require syamsoulcc/laravel-datatable-ssp
+composer require syamsoul/laravel-datatable-ssp
 ```
 &nbsp;
 ***NOTE***: Please see [CHANGELOG](CHANGELOG.md) for more information about what has changed recently.
