@@ -52,8 +52,14 @@ class SSP{
     
         foreach($cols as $e_key => $e_col){
             if(isset($e_col['db'])){
-                if(count(explode('.', $e_col['db'])) > 1) $e_col_db_name = $e_col['db'];
+                $e_col_arr = explode('.', $e_col['db']);
+                if(count($e_col_arr) > 1) {
+                    $e_col_db_name = $e_col['db'];
+                    if($e_col_arr[0] != $this->table) $e_col_db_name .= " AS ".$e_col_arr[0].".".$e_col_arr[1];
+                }
                 else $e_col_db_name = $this->table . '.' . $e_col['db'];
+                
+                $cols[$e_key]['db'] =  Arr::last(explode(" AS ", $e_col_db_name));
                 array_push($this->cols_arr, $e_col_db_name);
                 
                 $e_cdn_arr = explode('.', $e_col_db_name);
@@ -140,13 +146,19 @@ class SSP{
             
             $m_data = $this->getNormalData();
             $e_cdtk = $this->cols_dt_k;
-            
+
             if(!empty($m_data)){
                 $n_data = $m_data->toArray();
                 foreach($n_data as $e_key => $e_ndat){
                     foreach($e_cdtk as $ee_key => $ee_val){
                         if(is_numeric($ee_key)){
-                            if(isset($ee_val['db'])) $the_val = $m_data[$e_key]->{Arr::last(explode('.', $ee_val['db']))};
+                            if(isset($ee_val['db'])){
+                                $ee_val_db_arr = explode('.', $ee_val['db']);
+                                $ee_val_db_name = ($ee_val_db_arr[0] != $this->table) ? $ee_val['db'] : Arr::last($ee_val_db_arr);
+                                $the_val = $m_data[$e_key]->{$ee_val_db_name};
+                            }else{
+                                $the_val = null;
+                            }
                             if(isset($ee_val['formatter']) && is_callable($ee_val['formatter'])) $ret_data[$e_key][$ee_key] = $ee_val['formatter']($the_val, $m_data[$e_key]);
                             else $ret_data[$e_key][$ee_key] = $the_val;
                         }
