@@ -58,11 +58,12 @@ class SSP{
                     if($e_col_arr[0] != $this->table) $e_col_db_name .= " AS ".$e_col_arr[0].".".$e_col_arr[1];
                 }
                 else $e_col_db_name = $this->table . '.' . $e_col['db'];
-                
-                $cols[$e_key]['db'] =  Arr::last(explode(" AS ", $e_col_db_name));
+        
                 array_push($this->cols_arr, $e_col_db_name);
                 
-                $e_cdn_arr = explode('.', $e_col_db_name);
+                $cols[$e_key]['db'] =  Arr::last(explode(" AS ", $e_col_db_name));
+                
+                $e_cdn_arr = explode('.', $cols[$e_key]['db']);
                 array_push($this->cols_raw_arr, '`' . $this->table_prefix.$e_cdn_arr[0] . '`.`' . $e_cdn_arr[1] . '`');
             }
             if(!isset($e_col['dt'])) $cols[$e_key]['dt'] = null; 
