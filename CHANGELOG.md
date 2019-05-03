@@ -2,7 +2,7 @@
 
 All notable changes to `laravel-datatable-ssp` will be documented in this file
 
-## 2.0.1 - 2019-05-03
+## 2.0.2 - 2019-05-03
 - Debug: custom leftjoin column's name to avoid conflict if leftjoin table has same column name with main table 
 
 ## 2.0.0 - 2019-05-03

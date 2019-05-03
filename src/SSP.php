@@ -18,8 +18,8 @@ class SSP{
     */
     
     private $model;
-    private $table;
     private $is_model=true;
+    private $table;
     private $table_prefix;
     private $request;
     private $cols_info=[];
@@ -222,18 +222,28 @@ class SSP{
         if(count($columns) == 2){
             $table = explode(":", $table);
             
-            $full_table_name = $this->table_prefix . $table[0];
+            $table_name = $table[0];
+            $table_name_arr = explode(" AS ", $table_name);
             
-            $db_table = DB::table($table[0]);
+            if(count($table_name_arr) > 1){
+                $table_name = trim($table_name_arr[0]);
+                $table_alias_name = trim($table_name_arr[1]);
+                
+                $full_table_alias_name = $this->table_prefix . $table_alias_name;          
+            }
+            $full_table_name = $this->table_prefix . $table_name;
+            
+            
+            $db_table = DB::table($table_name);
             
             if(!empty($table[1])){
                 $cols = explode(",", $table[1]);
-                foreach($cols as $key=>$e_col) $cols[$key] = $table[0] . '.' .trim($e_col);
+                foreach($cols as $key=>$e_col) $cols[$key] = $table_name . '.' .trim($e_col);
                 $db_table = $db_table->select($cols);
             }
             
             array_push($this->join_query, [
-                'left', $db_table, $full_table_name, function($join) use($columns){
+                'left', $db_table, ($full_table_alias_name ?? $full_table_name), function($join) use($columns){
                     $join->on($columns[0], '=', $columns[1]);
                 }
             ]);
