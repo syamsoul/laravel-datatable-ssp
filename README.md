@@ -45,6 +45,8 @@ You can install the package via composer:
 ``` bash
 composer require syamsoulcc/laravel-datatable-ssp
 ```
+&nbsp;
+***NOTE***: Please see [CHANGELOG](CHANGELOG.md) for more information about what has changed recently.
 
 &nbsp;
 &nbsp;
