@@ -1,5 +1,3 @@
-
-
 # DataTable SSP (PHP) for Laravel
 
 
@@ -19,6 +17,10 @@ You can refer [here](https://datatables.net/examples/data_sources/server_side) a
 * [Installation](#installation)
 * [Usage & Reference](#usage--reference)
   * [How to use it?](#how-to-use-it)
+  * [Ordering/Sorting](#orderingsorting)
+  * [Where/OrWhere](#whereorwhere)
+  * [With Relationship](#with-relationship)
+  * [Left Join](#left-join)
 * [Example](#example)
   * [In PHP (Controller)](#in-php-controller)
   * [In Blade (Views)](#in-blade-views)
@@ -72,7 +74,7 @@ Which is:
 * `$dt_cols_opt` is an array of your columns' options, for example:
    ```php
    $dt_cols_opt = [
-       ['label'=>'ID',         'db'=>'id',            'dt'=>0, 'formatter'=>function($obj){ return str_pad($obj['value'], 5, '0', STR_PAD_LEFT); }],
+       ['label'=>'ID',         'db'=>'id',            'dt'=>0, 'formatter'=>function($value, $model){ return str_pad($value, 5, '0', STR_PAD_LEFT); }],
        ['label'=>'Username',   'db'=>'uname',         'dt'=>1],
        ['label'=>'Email',      'db'=>'email',         'dt'=>2],
    ];
@@ -109,18 +111,16 @@ Which is:
     ```
 * `$dt_formatter` is like a modifier that can modify the data from DB to be shown in views/blade, for example:
     ```php
-    $dt_formatter = function($obj){
-        return ucwords($obj['value']); 
+    $dt_formatter = function($value, $model){
+        return ucwords($value); 
         // which is 'value' is the value of the column
         
         // or
-        return $obj['value'] . '(#' .$obj['data']['id']. ')';
-        // which is 'data' is an associative array that store other columns' data for current row (e.g `id`, `created_at`)
-        // NOTE: if you want to get another column's data, you must include it in $dt_cols_opt. If you not include it, the data cannot be retrive in 'data'
+        return $model->name;
+        // which is 'model' is the model of the current row
         
         // or
-        return $obj['model']->formatted_uname();
-        // which is 'model' is the model of the current row
+        return $value . '(#' .$model->id. ')';       
     };
     ```
 
@@ -152,6 +152,14 @@ Which is:
 * `$column_name` is the column name based on the database.
 * `$column_value` is the value of the column.
 * `$query_function` is a normal Laravel's query function.
+
+
+&nbsp;
+### With Relationship
+
+
+&nbsp;
+### Left Join
 
 &nbsp;
 &nbsp;
@@ -189,14 +197,14 @@ class UsersController extends Controller
     private function dtSsp()
     {
         $dt = [
-            ['label'=>'ID',         'db'=>'id',            'dt'=>0, 'formatter'=>function($obj){ return str_pad($obj['value'], 5, '0', STR_PAD_LEFT); }],
+            ['label'=>'ID',         'db'=>'id',            'dt'=>0, 'formatter'=>function($value, $model){ return str_pad($value, 5, '0', STR_PAD_LEFT); }],
             ['label'=>'Email',      'db'=>'email',         'dt'=>2],
             ['label'=>'Username',   'db'=>'uname',         'dt'=>1],
             ['label'=>'Created At', 'db'=>'created_at',    'dt'=>3],
-            ['label'=>'Action',     'db'=>'id',            'dt'=>4, 'formatter'=>function($obj){ 
+            ['label'=>'Action',     'db'=>'id',            'dt'=>4, 'formatter'=>function($value, $model){ 
                 $btns = [
-                    '<button onclick="edit(\''.$obj['value'].'\');">Edit</button>',
-                    '<button onclick="delete(\''.$obj['value'].'\');">Delete</button>',
+                    '<button onclick="edit(\''.$value.'\');">Edit</button>',
+                    '<button onclick="delete(\''.$value.'\');">Delete</button>',
                 ];
                 return implode($btns, " "); 
             }],
