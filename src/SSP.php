@@ -48,6 +48,7 @@ class SSP{
             $this->table = (new $model())->getTable();
         }else{
             $this->table = $model;
+            $this->is_model = false;
         }
     
         foreach($cols as $e_key => $e_col){

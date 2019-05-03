@@ -9,7 +9,7 @@
 This package allows you to manage your DataTable from server-side in Laravel app (inspired by [original DataTable SSP](https://github.com/DataTables/DataTablesSrc/blob/master/examples/server_side/scripts/ssp.class.php)).
 
 
-You can refer [here](https://datatables.net/examples/data_sources/server_side) about the implementation of original DataTable SSP.
+You can refer [here (click here)](https://datatables.net/examples/data_sources/server_side) about the implementation of original DataTable SSP.
 
 
 &nbsp;
@@ -69,9 +69,11 @@ $my_ssp = new SSP(String $model, Array $dt_cols_opt);
 ```
 
 Which is:
-* `$model` is a string of your model name, for example:
+* `$model` is a string of your model name or table name, for example:
   ```php
   $model = '\App\User';
+  //or
+  $model = 'users'; // NOTE: you should not include the prefix
   ```
 * `$dt_cols_opt` is an array of your columns' options, for example:
    ```php
@@ -158,10 +160,38 @@ Which is:
 
 &nbsp;
 ### With Relationship
+```
+$my_ssp->with($model_relationship);
+```
+Which is:
+* `$model_relationship` is the relationship name applied to the model.
 
+The usage of `with` feature is 100% same with the Laravel's `with`. FYI, `with` is used to `eager load` the relationship's data. You can refer [here (click here)](https://laravel.com/docs/5.8/eloquent-relationships#eager-loading) for more details.
+
+***NOTE:*** `with` feature will **NOT** working if you use `table's name` as the first parameter in constructor. [e.g: `new SSP('users', $dt_cols_opt)` will IGNORE the `with`, but `new SSP('App\User', $dt_cols_opt)` will execute the `with`]
 
 &nbsp;
 ### Left Join
+```
+$my_ssp->leftJoin($table_name, $table_one_column, $table_two_column);
+```
+Which is:
+* `$table_name` is the string of the table's name.
+* `$table_one_column` is the column's name from table #1.
+* `$table_two_column` is the column's name from table #2.
+
+
+For example:
+```
+$my_ssp->leftJoin('countries', 'users.country_id', 'countries.id'); // left join `countries` on `users`.`country_id` = `countries`.`id`
+
+// OR
+
+$my_ssp->leftJoin('countries AS ctry', 'users.country_id', 'ctry.id');
+```
+
+***NOTE:*** `leftJoin` feature will **NOT** working if you use `model's name` as the first parameter in constructor. [e.g: `new SSP('App\Countries', $dt_cols_opt)` will IGNORE the `leftJoin`, but `new SSP('countries', $dt_cols_opt)` will execute the `leftJoin`]
+
 
 &nbsp;
 &nbsp;

@@ -2,6 +2,10 @@
 
 All notable changes to `laravel-datatable-ssp` will be documented in this file
 
+## 2.0.3 - 2019-05-04
+- Improvement: alias table name for leftjoin
+- Improvement: can also put table's name for first parameter in constructor
+
 ## 2.0.2 - 2019-05-03
 - Debug: custom leftjoin column's name to avoid conflict if leftjoin table has same column name with main table 
 
