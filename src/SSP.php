@@ -220,6 +220,12 @@ class SSP{
     }
     
     public function leftJoin($table, ...$columns){
+        if(isset($columns[0]) && is_callable($columns[0])){
+            $extend_query = $columns[0];
+            unset($columns[0]); 
+            $columns=array_values($columns);
+        }
+        
         if(count($columns) == 2){
             $table = explode(":", $table);
             
@@ -239,8 +245,16 @@ class SSP{
             
             if(!empty($table[1])){
                 $cols = explode(",", $table[1]);
-                foreach($cols as $key=>$e_col) $cols[$key] = $table_name . '.' .trim($e_col);
+                foreach($cols as $key=>$e_col){
+                    $e_col = trim($e_col);
+                    if(count(explode(".", $e_col)) > 1) $cols[$key] = $e_col;
+                    else $cols[$key] = $table_name . '.' . $e_col;
+                }
                 $db_table = $db_table->select($cols);
+            }
+            
+            if(isset($extend_query) && is_callable($extend_query)){
+                $extend_query($db_table);
             }
             
             array_push($this->join_query, [
