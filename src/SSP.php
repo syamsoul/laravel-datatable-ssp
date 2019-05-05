@@ -36,6 +36,7 @@ class SSP{
     private $where_query=[];
     private $join_query=[];
     private $with_related_table;
+    private $group_by;
     private $order;
     
     function __construct($model, $cols){
@@ -53,19 +54,24 @@ class SSP{
     
         foreach($cols as $e_key => $e_col){
             if(isset($e_col['db'])){
-                $e_col_arr = explode('.', $e_col['db']);
-                if(count($e_col_arr) > 1) {
-                    $e_col_db_name = $e_col['db'];
-                    if($e_col_arr[0] != $this->table) $e_col_db_name .= " AS ".$e_col_arr[0].".".$e_col_arr[1];
+                if(is_a($e_col['db'], get_class(DB::raw('')))){
+                    array_push($this->cols_arr, $e_col['db']);
+                    array_push($this->cols_raw_arr, $e_col['db']->getValue());
+                }else{
+                    $e_col_arr = explode('.', $e_col['db']);
+                    if(count($e_col_arr) > 1) {
+                        $e_col_db_name = $e_col['db'];
+                        if($e_col_arr[0] != $this->table) $e_col_db_name .= " AS ".$e_col_arr[0].".".$e_col_arr[1];
+                    }
+                    else $e_col_db_name = $this->table . '.' . $e_col['db'];
+            
+                    array_push($this->cols_arr, $e_col_db_name);
+                    
+                    $cols[$e_key]['db'] =  Arr::last(explode(" AS ", $e_col_db_name));
+                    
+                    $e_cdn_arr = explode('.', $cols[$e_key]['db']);
+                    array_push($this->cols_raw_arr, '`' . $this->table_prefix.$e_cdn_arr[0] . '`.`' . $e_cdn_arr[1] . '`');
                 }
-                else $e_col_db_name = $this->table . '.' . $e_col['db'];
-        
-                array_push($this->cols_arr, $e_col_db_name);
-                
-                $cols[$e_key]['db'] =  Arr::last(explode(" AS ", $e_col_db_name));
-                
-                $e_cdn_arr = explode('.', $cols[$e_key]['db']);
-                array_push($this->cols_raw_arr, '`' . $this->table_prefix.$e_cdn_arr[0] . '`.`' . $e_cdn_arr[1] . '`');
             }
             if(!isset($e_col['dt'])) $cols[$e_key]['dt'] = null; 
         }
@@ -127,6 +133,8 @@ class SSP{
                 }else{
                     $this->filter_count = $this->total_count;
                 }
+                
+                if(!empty($this->group_by)) $obj_model = $obj_model->groupBy($this->group_by);
                 
                 $obj_model = $obj_model->orderBy($cdtk[$req['order'][0]['column']]['db'], $req['order'][0]['dir']);
                 
@@ -271,6 +279,12 @@ class SSP{
     
     public function with($related_table){
         $this->with_related_table = $related_table;
+        
+        return $this;
+    }
+    
+    public function groupBy($group_by){
+        $this->group_by = $group_by;
         
         return $this;
     }
