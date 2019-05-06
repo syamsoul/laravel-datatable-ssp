@@ -56,7 +56,7 @@ class SSP{
             if(isset($e_col['db'])){
                 if(is_a($e_col['db'], get_class(DB::raw('')))){
                     array_push($this->cols_arr, $e_col['db']);
-                    array_push($this->cols_raw_arr, $e_col['db']->getValue());
+                    array_push($this->cols_raw_arr, trim(explode(" AS ", $e_col['db']->getValue())[0]));
                 }else{
                     $e_col_arr = explode('.', $e_col['db']);
                     if(count($e_col_arr) > 1) {
@@ -65,7 +65,7 @@ class SSP{
                     }
                     else $e_col_db_name = $this->table . '.' . $e_col['db'];
             
-                    array_push($this->cols_arr, $e_col_db_name);
+                    if(!in_array($e_col_db_name, $this->cols_arr)) array_push($this->cols_arr, $e_col_db_name);
                     
                     $cols[$e_key]['db'] =  Arr::last(explode(" AS ", $e_col_db_name));
                     
@@ -107,34 +107,52 @@ class SSP{
             $cdtk = $this->cols_dt_k;            
             
             if(isset($req['draw']) && isset($req['order']) && isset($req['start']) && isset($req['length'])){
+                
+                $extra_cols = [];
+                if(!empty($req['search']['value'])){
+                    $col_search_str = "CONCAT(COALESCE(".implode($this->cols_raw_arr, ",''),' ',COALESCE(").",'')) AS `filter_col`";
+                    array_push($extra_cols, DB::raw($col_search_str));
+                }
+                
+                $the_cols = array_merge($this->cols_arr, $extra_cols);
                 if($this->is_model){
-                    if(empty($this->with_related_table)) $obj_model = ($this->model)::select($this->cols_arr);
-                    else $obj_model = ($this->model)::with($this->with_related_table)->select($this->cols_arr);
+                    if(empty($this->with_related_table)) $obj_model = ($this->model)::select($the_cols);
+                    else $obj_model = ($this->model)::with($this->with_related_table)->select($the_cols);
                 }else{
-                    $obj_model = DB::table($this->table)->select($this->cols_arr);
+                    $obj_model = DB::table($this->table)->select($the_cols);
                     if(!empty($this->join_query)) foreach($this->join_query as $e_jqry){
                         if($e_jqry[0] == "left") $obj_model = $obj_model->leftJoinSub($e_jqry[1], $e_jqry[2], $e_jqry[3]);
                     }
                 }
-
                 
                 if(!empty($this->where_query)) foreach($this->where_query as $e_qry){
                     if($e_qry[0] == "and") $obj_model = $obj_model->where($e_qry[1]);
                     elseif($e_qry[0] == "or") $obj_model = $obj_model->orWhere($e_qry[1]);
                 }
                 
-                $this->total_count = $obj_model->count();
                 
 
+                if(!empty($this->group_by)){
+                    $gb_arr = explode(".", $this->group_by);
+                    if(count($gb_arr) > 1){
+                        $table  = $this->table_prefix . $gb_arr[0];
+                        $column = $gb_arr[1];
+                    }else{
+                        $table  = $this->table_prefix . $this->table;
+                        $column = $gb_arr[0];
+                    }
+                    $this->total_count = $obj_model->count(DB::raw("DISTINCT `$table`.`$column`"));
+                    $obj_model = $obj_model->groupBy($this->group_by);
+                }else $this->total_count = $obj_model->count();
+
                 if(!empty($req['search']['value'])){
-                    $col_search_str = "CONCAT(COALESCE(".implode($this->cols_raw_arr, ",''),' ',COALESCE(").",''))";
-                    $obj_model = $obj_model->where(DB::raw($col_search_str), 'LIKE', '%'.$req['search']['value'].'%');
-                    $this->filter_count = $obj_model->count();
+                    $query_search_value = '%'.$req['search']['value'].'%';
+                    $obj_model = $obj_model->having('filter_col', 'LIKE', $query_search_value);
+                    //$this->filter_count = $obj_model->count();
+                    $this->filter_count = DB::select("SELECT count(*) AS `c` FROM (".$obj_model->toSql().") AS `temp_count_table`", [$query_search_value])[0]->c;
                 }else{
                     $this->filter_count = $this->total_count;
                 }
-                
-                if(!empty($this->group_by)) $obj_model = $obj_model->groupBy($this->group_by);
                 
                 $obj_model = $obj_model->orderBy($cdtk[$req['order'][0]['column']]['db'], $req['order'][0]['dir']);
                 
