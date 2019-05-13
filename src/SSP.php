@@ -149,7 +149,7 @@ class SSP{
                     $query_search_value = '%'.$req['search']['value'].'%';
                     $obj_model = $obj_model->having('filter_col', 'LIKE', $query_search_value);
                     //$this->filter_count = $obj_model->count();
-                    $this->filter_count = DB::select("SELECT count(*) AS `c` FROM (".$obj_model->toSql().") AS `temp_count_table`", [$query_search_value])[0]->c;
+                    $this->filter_count = DB::select("SELECT count(*) AS `c` FROM (".$obj_model->toSql().") AS `temp_count_table`", array_merge($obj_model->getBindings(), [$query_search_value]))[0]->c;
                 }else{
                     $this->filter_count = $this->total_count;
                 }
