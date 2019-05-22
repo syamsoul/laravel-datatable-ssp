@@ -26,5 +26,15 @@
         "psr-4": {
             "SoulDoit\\DataTable\\": "src"
         }
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "SoulDoit\\DataTable\\DataTableServiceProvider"
+            ]
+        }
     }
 }

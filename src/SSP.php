@@ -262,9 +262,9 @@ class SSP{
                 $table_name = trim($table_name_arr[0]);
                 $table_alias_name = trim($table_name_arr[1]);
                 
-                $full_table_alias_name = $this->table_prefix . $table_alias_name;          
+                $full_table_alias_name = (config('sd-datatable-ssp.leftjoin.alias_has_prefix') ? $this->table_prefix : '') . $table_alias_name;          
             }
-            $full_table_name = $this->table_prefix . $table_name;
+            $full_table_name = (config('sd-datatable-ssp.leftjoin.alias_has_prefix') ? $this->table_prefix : '') . $table_name;
             
             
             $db_table = DB::table($table_name);
