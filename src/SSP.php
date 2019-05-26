@@ -333,7 +333,7 @@ class SSP{
     
     public function searchKeywordFormatter($formatter){
         if(is_callable($formatter)){
-            $this->searchKeywordFormatter = $formatter;
+            $this->theSearchKeywordFormatter = $formatter;
         }
         
         return $this;

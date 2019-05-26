@@ -2,6 +2,9 @@
 
 All notable changes to `laravel-datatable-ssp` will be documented in this file
 
+## 2.1.1 - 2019-05-26
+- Debug: `searchKeywordFormatter`
+
 ## 2.1.0 - 2019-05-26
 - Debug: handle `db` that use `DB::raw()`
 - New feature: `searchKeywordFormatter` for formatting the keyword that will appear in table 
