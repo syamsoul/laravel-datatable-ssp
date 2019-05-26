@@ -183,27 +183,41 @@ class SSP{
             if(!empty($m_data)){
                 $n_data = $m_data->toArray();
                 foreach($n_data as $e_key => $e_ndat){
-                    foreach($e_cdtk as $ee_key => $ee_val){
-                        if(is_numeric($ee_key)){
-                            if(isset($ee_val['db'])){
-                                $ee_val_db_arr = explode('.', $ee_val['db']);
-                                $ee_val_db_name = ($ee_val_db_arr[0] != $this->table) ? $ee_val['db'] : Arr::last($ee_val_db_arr);
-                                $the_val = $m_data[$e_key]->{$ee_val_db_name};
-                            }else{
-                                $the_val = null;
-                            }
-                            
-                            if(!empty($req['search']['value'])){
-                                $search_val = $req['search']['value'];
-                                
-                                if(is_callable($this->theSearchKeywordFormatter)){
-                                    if(is_string($the_val) || is_numeric($the_val)) $the_val = strtr($the_val, [$search_val=>($this->theSearchKeywordFormatter)($search_val)]);
-                                }
-                            }
-                            
-                            if(isset($ee_val['formatter']) && is_callable($ee_val['formatter'])) $ret_data[$e_key][$ee_key] = $ee_val['formatter']($the_val, $m_data[$e_key]);
-                            else $ret_data[$e_key][$ee_key] = $the_val;
+                    $theVals    = [];
+                    $theDatas   = [];
+                    foreach($this->cols as $ee_key => $ee_val){
+                        if(isset($ee_val['db'])){
+                            $ee_val_db_arr = explode('.', $ee_val['db']);
+                            $ee_val_db_name = ($ee_val_db_arr[0] != $this->table) ? $ee_val['db'] : Arr::last($ee_val_db_arr);
+                            $the_val = $m_data[$e_key]->{$ee_val_db_name};
+                        }else{
+                            $the_val = null;
                         }
+                        
+                        if(!empty($req['search']['value'])){
+                            $search_val = $req['search']['value'];
+                            
+                            if(is_callable($this->theSearchKeywordFormatter)){
+                                $formatted = str_replace_nth($search_val, function($found){
+                                    return ($this->theSearchKeywordFormatter)($found);
+                                }, $the_val);
+                                if(is_string($the_val) || is_numeric($the_val)) $the_val = $formatted[0];
+                                //$formatted[1]; count of keywords found
+                            }
+                        }
+                        
+                        if(isset($ee_val['db'])) $theDatas[$ee_val_db_name] = $the_val;
+                        
+                        if(isset($ee_val['dt']) && is_numeric($ee_val['dt'])){
+                            $theVals[$ee_val['dt']] = $the_val;
+                            
+                            if(isset($ee_val['formatter']) && is_callable($ee_val['formatter'])) $ret_data[$e_key][$ee_val['dt']] = $ee_val['formatter'];
+                            else $ret_data[$e_key][$ee_val['dt']] = $the_val;
+                        }
+                    }
+                   
+                    foreach($ret_data[$e_key] as $key=>$e_rdek){
+                        if(is_callable($e_rdek)) $ret_data[$e_key][$key] = $e_rdek($theVals[$key], $m_data[$e_key], $theDatas);
                     }
                 }
             }
