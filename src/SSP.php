@@ -55,8 +55,12 @@ class SSP{
         foreach($cols as $e_key => $e_col){
             if(isset($e_col['db'])){
                 if(is_a($e_col['db'], get_class(DB::raw('')))){
+                    $e_col_db_arr = explode(" AS ", $e_col['db']->getValue());
+                    
                     array_push($this->cols_arr, $e_col['db']);
-                    array_push($this->cols_raw_arr, trim(explode(" AS ", $e_col['db']->getValue())[0]));
+                    array_push($this->cols_raw_arr, trim($e_col_db_arr[0]));
+                    
+                    $cols[$e_key]['db'] = strtr(trim($e_col_db_arr[1]), ['`'=>'']);
                 }else{
                     $e_col_arr = explode('.', $e_col['db']);
                     if(count($e_col_arr) > 1) {
