@@ -38,6 +38,7 @@ class SSP{
     private $with_related_table;
     private $group_by;
     private $order;
+    private $theSearchKeywordFormatter;
     
     function __construct($model, $cols){
         $this->table_prefix = DB::getTablePrefix() ?? "";
@@ -191,6 +192,15 @@ class SSP{
                             }else{
                                 $the_val = null;
                             }
+                            
+                            if(!empty($req['search']['value'])){
+                                $search_val = $req['search']['value'];
+                                
+                                if(is_callable($this->theSearchKeywordFormatter)){
+                                    if(is_string($the_val) || is_numeric($the_val)) $the_val = strtr($the_val, [$search_val=>($this->theSearchKeywordFormatter)($search_val)]);
+                                }
+                            }
+                            
                             if(isset($ee_val['formatter']) && is_callable($ee_val['formatter'])) $ret_data[$e_key][$ee_key] = $ee_val['formatter']($the_val, $m_data[$e_key]);
                             else $ret_data[$e_key][$ee_key] = $the_val;
                         }
@@ -319,6 +329,14 @@ class SSP{
     
     public function sort($dt, $sort){
         return $this->order($dt, $sort);
+    }
+    
+    public function searchKeywordFormatter($formatter){
+        if(is_callable($formatter)){
+            $this->searchKeywordFormatter = $formatter;
+        }
+        
+        return $this;
     }
 }
 
