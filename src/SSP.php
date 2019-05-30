@@ -198,7 +198,7 @@ class SSP{
                             $search_val = $req['search']['value'];
                             
                             if(is_callable($this->theSearchKeywordFormatter)){
-                                $formatted = str_replace_nth($search_val, function($found){
+                                $formatted = sd_str_replace_nth($search_val, function($found){
                                     return ($this->theSearchKeywordFormatter)($found);
                                 }, $the_val);
                                 if(is_string($the_val) || is_numeric($the_val)) $the_val = $formatted[0];
