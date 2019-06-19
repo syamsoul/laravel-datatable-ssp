@@ -217,7 +217,7 @@ class SSP{
                     }
                    
                     foreach($ret_data[$e_key] as $key=>$e_rdek){
-                        if(is_callable($e_rdek) && !is_string($e_rdek) && !is_array($e_rdek)) $ret_data[$e_key][$key] = $e_rdek($theVals[$key], $m_data[$e_key], $theDatas);
+                        if(is_callable($e_rdek) && ($e_rdek instanceof \Closure) && !is_string($e_rdek) && !is_array($e_rdek)) $ret_data[$e_key][$key] = $e_rdek($theVals[$key], $m_data[$e_key], $theDatas);
                     }
                 }
             }
