@@ -39,6 +39,8 @@ class SSP{
     private $group_by;
     private $order;
     private $theSearchKeywordFormatter;
+    private $variables;
+    private $variableInitiator;
     
     function __construct($model, $cols){
         $this->table_prefix = DB::getTablePrefix() ?? "";
@@ -58,10 +60,13 @@ class SSP{
                 if(is_a($e_col['db'], get_class(DB::raw('')))){
                     $e_col_db_arr = explode(" AS ", $e_col['db']->getValue());
                     
-                    array_push($this->cols_arr, $e_col['db']);
-                    array_push($this->cols_raw_arr, trim($e_col_db_arr[0]));
+                    $column_alias_name = trim(Arr::last($e_col_db_arr));
+                    unset($e_col_db_arr[count($e_col_db_arr)-1]);
                     
-                    $cols[$e_key]['db'] = strtr(trim(Arr::last($e_col_db_arr)), ['`'=>'']);
+                    array_push($this->cols_arr, $e_col['db']);
+                    array_push($this->cols_raw_arr, trim(implode(" AS ", $e_col_db_arr)));
+                    
+                    $cols[$e_key]['db'] = strtr($column_alias_name, ['`'=>'']);
                 }else{
                     $e_col_arr = explode('.', $e_col['db']);
                     if(count($e_col_arr) > 1) {
@@ -115,7 +120,10 @@ class SSP{
                 
                 $extra_cols = [];
                 if(!empty($req['search']['value'])){
-                    $col_search_str = "CONCAT(COALESCE(".implode($this->cols_raw_arr, ",''),' ',COALESCE(").",'')) AS `filter_col`";
+                    $replaced_variables = [];
+                    foreach($this->variables as $variable) $replaced_variables["@$variable"] = "@$variable"."2";
+                    
+                    $col_search_str = "CONCAT(COALESCE(". strtr(implode($this->cols_raw_arr, ",''),' ',COALESCE("), $replaced_variables) .",'')) AS `filter_col`";
                     array_push($extra_cols, DB::raw($col_search_str));
                 }
                 
@@ -134,8 +142,6 @@ class SSP{
                     if($e_qry[0] == "and") $obj_model = $obj_model->where($e_qry[1]);
                     elseif($e_qry[0] == "or") $obj_model = $obj_model->orWhere($e_qry[1]);
                 }
-                
-                
 
                 if(!empty($this->group_by)){
                     $gb_arr = explode(".", $this->group_by);
@@ -151,6 +157,8 @@ class SSP{
                 }else $this->total_count = $obj_model->count();
 
                 if(!empty($req['search']['value'])){
+                    if(is_callable($this->variableInitiator)) ($this->variableInitiator)();
+                    
                     $query_search_value = '%'.$req['search']['value'].'%';
                     $obj_model = $obj_model->having('filter_col', 'LIKE', $query_search_value);
                     //$this->filter_count = $obj_model->count();
@@ -163,6 +171,9 @@ class SSP{
                 
                 if($req['length'] > -1) $obj_model = $obj_model->offset($req['start'])->limit($req['length']);
                 //dd($obj_model->toSql());
+                
+                if(is_callable($this->variableInitiator)) ($this->variableInitiator)();
+                
                 $this->normal_data = $obj_model->get();
             }else{
                 $this->normal_data = false;
@@ -348,6 +359,30 @@ class SSP{
     public function searchKeywordFormatter($formatter){
         if(is_callable($formatter)){
             $this->theSearchKeywordFormatter = $formatter;
+        }
+        
+        return $this;
+    }
+    
+    public function initVariable($keyValueArr){
+        
+        if(is_array($keyValueArr)){
+            $this->variables = array_keys($keyValueArr);
+            $this->variableInitiator = function() use($keyValueArr){
+                try {
+                    DB::transaction(function() use($keyValueArr){
+                        foreach($keyValueArr as $key=>$value){
+                            DB::unprepared(DB::raw("SET @$key:=$value"));
+                            DB::unprepared(DB::raw("SET @$key"."2:=$value"));
+                        }
+                    });
+                
+                    DB::commit();
+                } catch (\Exception $e){ 
+                    DB::rollback();
+                    dd($e->getMessage());
+                }
+            };
         }
         
         return $this;
