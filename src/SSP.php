@@ -61,7 +61,7 @@ class SSP{
                     array_push($this->cols_arr, $e_col['db']);
                     array_push($this->cols_raw_arr, trim($e_col_db_arr[0]));
                     
-                    $cols[$e_key]['db'] = strtr(trim($e_col_db_arr[1]), ['`'=>'']);
+                    $cols[$e_key]['db'] = strtr(trim(Arr::last($e_col_db_arr)), ['`'=>'']);
                 }else{
                     $e_col_arr = explode('.', $e_col['db']);
                     if(count($e_col_arr) > 1) {
