@@ -156,11 +156,14 @@ class SSP{
                     $obj_model = $obj_model->groupBy($this->group_by);
                 }else $this->total_count = $obj_model->count();
 
+                if(!$this->is_model) $obj_model = DB::query()->fromSub($obj_model, $this->table_prefix . $this->table);
+
                 if(!empty($req['search']['value'])){
                     if(is_callable($this->variableInitiator)) ($this->variableInitiator)();
                     
                     $query_search_value = '%'.$req['search']['value'].'%';
-                    $obj_model = $obj_model->having('filter_col', 'LIKE', $query_search_value);
+                    if($this->is_model) $obj_model = $obj_model->having('filter_col', 'LIKE', $query_search_value);
+                    else $obj_model = $obj_model->where('filter_col', 'LIKE', $query_search_value);
                     //$this->filter_count = $obj_model->count();
                     $this->filter_count = DB::select("SELECT count(*) AS `c` FROM (".$obj_model->toSql().") AS `temp_count_table`", array_merge($obj_model->getBindings(), [$query_search_value]))[0]->c;
                 }else{
