@@ -39,7 +39,7 @@ class SSP{
     private $group_by;
     private $order;
     private $theSearchKeywordFormatter;
-    private $variables;
+    private $variables=[];
     private $variableInitiator;
     
     function __construct($model, $cols){
