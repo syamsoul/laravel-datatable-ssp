@@ -28,6 +28,7 @@ class SSP{
     private $cols_dt_k;
     private $cols_arr=[];
     private $cols_raw_arr=[];
+    private $cols_filter_raw_arr=[];
     private $cols_exc_arr=[];
     private $normal_data;
     private $dt_arr;
@@ -57,6 +58,8 @@ class SSP{
     
         foreach($cols as $e_key => $e_col){
             if(isset($e_col['db'])){
+                $e_searchable = (isset($e_col['searchable']) && is_bool($e_searchable)) ? $e_col['searchable'] : true;
+                
                 if(is_a($e_col['db'], get_class(DB::raw('')))){
                     $e_col_db_arr = explode(" AS ", $e_col['db']->getValue());
                     
@@ -65,6 +68,7 @@ class SSP{
                     
                     array_push($this->cols_arr, $e_col['db']);
                     array_push($this->cols_raw_arr, trim(implode(" AS ", $e_col_db_arr)));
+                    if($e_searchable) array_push($this->cols_filter_raw_arr, trim(implode(" AS ", $e_col_db_arr)));
                     
                     $cols[$e_key]['db'] = strtr($column_alias_name, ['`'=>'']);
                 }else{
@@ -81,6 +85,7 @@ class SSP{
                     
                     $e_cdn_arr = explode('.', $cols[$e_key]['db']);
                     array_push($this->cols_raw_arr, '`' . $this->table_prefix.$e_cdn_arr[0] . '`.`' . $e_cdn_arr[1] . '`');
+                    if($e_searchable) array_push($this->cols_filter_raw_arr, '`' . $this->table_prefix.$e_cdn_arr[0] . '`.`' . $e_cdn_arr[1] . '`');
                 }
             }
             if(!isset($e_col['dt'])) $cols[$e_key]['dt'] = null; 
@@ -123,7 +128,7 @@ class SSP{
                     $replaced_variables = [];
                     foreach($this->variables as $variable) $replaced_variables["@$variable"] = "@$variable"."2";
                     
-                    $col_search_str = "CONCAT(COALESCE(". strtr(implode($this->cols_raw_arr, ",''),' ',COALESCE("), $replaced_variables) .",'')) AS `filter_col`";
+                    $col_search_str = "CONCAT(COALESCE(". strtr(implode($this->cols_filter_raw_arr, ",''),' ',COALESCE("), $replaced_variables) .",'')) AS `filter_col`";
                     array_push($extra_cols, DB::raw($col_search_str));
                 }
                 
