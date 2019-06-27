@@ -55,7 +55,7 @@ class SSP{
             $this->table = $model;
             $this->is_model = false;
         }
-    
+
         foreach($cols as $e_key => $e_col){
             if(isset($e_col['db'])){
                 $e_searchable = (isset($e_col['searchable']) && is_bool($e_searchable)) ? $e_col['searchable'] : true;
@@ -175,7 +175,9 @@ class SSP{
                     $this->filter_count = $this->total_count;
                 }
                 
-                $obj_model = $obj_model->orderBy($cdtk[$req['order'][0]['column']]['db'], $req['order'][0]['dir']);
+                $clean_col_name = $this->getColumnNameWithoutOriTable($cdtk[$req['order'][0]['column']]['db']);
+                
+                $obj_model = $obj_model->orderBy(DB::raw('`' . $clean_col_name . '`'), $req['order'][0]['dir']);
                 
                 if($req['length'] > -1) $obj_model = $obj_model->offset($req['start'])->limit($req['length']);
                 //dd($obj_model->toSql());
@@ -394,6 +396,16 @@ class SSP{
         }
         
         return $this;
+    }
+    
+    private function getColumnNameWithoutOriTable($column_name){
+        $cn_arr = explode('.', $column_name);
+        
+        if(count($cn_arr) > 1){
+            if($cn_arr[0] === $this->table) return $cn_arr[1];
+        }
+        
+        return $column_name;
     }
 }
 
