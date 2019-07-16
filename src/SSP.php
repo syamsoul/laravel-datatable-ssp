@@ -58,7 +58,7 @@ class SSP{
 
         foreach($cols as $e_key => $e_col){
             if(isset($e_col['db'])){
-                $e_searchable = (isset($e_col['searchable']) && is_bool($e_searchable)) ? $e_col['searchable'] : true;
+                $e_searchable = (isset($e_col['searchable']) && is_bool($e_col['searchable'])) ? $e_col['searchable'] : true;
                 
                 if(is_a($e_col['db'], get_class(DB::raw('')))){
                     $e_col_db_arr = explode(" AS ", $e_col['db']->getValue());
