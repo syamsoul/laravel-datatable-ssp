@@ -149,16 +149,26 @@ class SSP{
                 }
 
                 if(!empty($this->group_by)){
-                    $gb_arr = explode(".", $this->group_by);
-                    if(count($gb_arr) > 1){
-                        $table  = $this->table_prefix . $gb_arr[0];
-                        $column = $gb_arr[1];
+                    $gb = $this->group_by;
+                    
+                    if(is_a($gb, get_class(DB::raw('')))){
+                        $distinct = explode(" AS ", $gb->getValue())[0];
+                        $gb = DB::raw($distinct);
                     }else{
-                        $table  = $this->table_prefix . $this->table;
-                        $column = $gb_arr[0];
-                    }
-                    $this->total_count = $obj_model->count(DB::raw("DISTINCT `$table`.`$column`"));
-                    $obj_model = $obj_model->groupBy($this->group_by);
+                        $gb_arr = explode(".", $gb);
+                        if(count($gb_arr) > 1){
+                            $table  = $this->table_prefix . $gb_arr[0];
+                            $column = $gb_arr[1];
+                            
+                        }else{
+                            $table  = $this->table_prefix . $this->table;
+                            $column = $gb_arr[0];
+                        }
+                        $distinct = "`$table`.`$column`";
+                    }                    
+                        
+                    $this->total_count = $obj_model->count(DB::raw("DISTINCT $distinct"));
+                    $obj_model = $obj_model->groupBy($gb);
                 }else $this->total_count = $obj_model->count();
 
                 if(!$this->is_model) $obj_model = DB::query()->fromSub($obj_model, $this->table_prefix . $this->table);
