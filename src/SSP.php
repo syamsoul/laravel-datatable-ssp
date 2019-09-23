@@ -3,7 +3,6 @@ namespace SoulDoit\DataTable;
 
 use DB;
 use App;
-use Arr;
 
 class SSP{
     
@@ -63,7 +62,7 @@ class SSP{
                 if(is_a($e_col['db'], get_class(DB::raw('')))){
                     $e_col_db_arr = explode(" AS ", $e_col['db']->getValue());
                     
-                    $column_alias_name = trim(Arr::last($e_col_db_arr));
+                    $column_alias_name = trim(sd_get_array_last($e_col_db_arr));
                     unset($e_col_db_arr[count($e_col_db_arr)-1]);
                     
                     array_push($this->cols_arr, $e_col['db']);
@@ -81,7 +80,7 @@ class SSP{
             
                     if(!in_array($e_col_db_name, $this->cols_arr)) array_push($this->cols_arr, $e_col_db_name);
                     
-                    $cols[$e_key]['db'] =  Arr::last(explode(" AS ", $e_col_db_name));
+                    $cols[$e_key]['db'] =  sd_get_array_last(explode(" AS ", $e_col_db_name));
                     
                     $e_cdn_arr = explode('.', $cols[$e_key]['db']);
                     array_push($this->cols_raw_arr, '`' . $this->table_prefix.$e_cdn_arr[0] . '`.`' . $e_cdn_arr[1] . '`');
@@ -219,7 +218,7 @@ class SSP{
                     foreach($this->cols as $ee_key => $ee_val){
                         if(isset($ee_val['db'])){
                             $ee_val_db_arr = explode('.', $ee_val['db']);
-                            $ee_val_db_name = ($ee_val_db_arr[0] != $this->table) ? $ee_val['db'] : Arr::last($ee_val_db_arr);
+                            $ee_val_db_name = ($ee_val_db_arr[0] != $this->table) ? $ee_val['db'] : sd_get_array_last($ee_val_db_arr);
                             $the_val = $m_data[$e_key]->{$ee_val_db_name};
                         }else{
                             $the_val = null;

@@ -38,3 +38,10 @@ if (!function_exists('sd_str_replace_nth')) {
         ];
     }
 }
+
+if (!function_exists('sd_get_array_last')) {
+    function sd_get_array_last(array $arr)
+    {
+        return $arr[count($arr) - 1];
+    }
+}
