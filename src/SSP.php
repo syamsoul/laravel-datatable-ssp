@@ -42,6 +42,8 @@ class SSP{
     private $theSearchKeywordFormatter;
     private $variables=[];
     private $variableInitiator;
+    private $special_cols=['sd_counter_value'];
+    private $is_have_counter_variable = false;
     
     function __construct($model, $cols){
         $this->table_prefix = DB::getTablePrefix() ?? "";
@@ -79,7 +81,9 @@ class SSP{
                     }
                     else $e_col_db_name = $this->table . '.' . $e_col['db'];
             
-                    if(!in_array($e_col_db_name, $this->cols_arr)) array_push($this->cols_arr, $e_col_db_name);
+                    if(!in_array($e_col['db'], $this->special_cols)){
+                        if(!in_array($e_col_db_name, $this->cols_arr)) array_push($this->cols_arr, $e_col_db_name);
+                    }else $this->is_have_counter_variable = true;
                     
                     $cols[$e_key]['db'] =  sd_get_array_last(explode(" AS ", $e_col_db_name));
                     
@@ -170,10 +174,13 @@ class SSP{
                     $this->total_count = $obj_model->count(DB::raw("DISTINCT $distinct"));
                     $obj_model = $obj_model->groupBy($gb);
                 }else $this->total_count = $obj_model->count();
-
-                if(!$this->is_model) $obj_model = DB::query()->fromSub($obj_model, $this->table_prefix . $this->table);
-
+                
                 foreach($this->custom_query as $each_query) $each_query($obj_model);
+
+                if(!$this->is_model){
+                    if($this->is_have_counter_variable) $obj_model = DB::query()->select(["*", DB::raw("(@sd_counter_value:=@sd_counter_value+1) AS `sd_counter_value`")])->fromSub($obj_model, $this->table_prefix . $this->table);
+                    $obj_model = DB::query()->fromSub($obj_model, $this->table_prefix . $this->table);
+                }
 
                 if(!empty($req['search']['value'])){
                     if(is_callable($this->variableInitiator)) ($this->variableInitiator)();
@@ -194,6 +201,7 @@ class SSP{
                 if($req['length'] > -1) $obj_model = $obj_model->offset($req['start'])->limit($req['length']);
                 //dd($obj_model->toSql());
                 
+                $this->setDBVariable(['sd_counter_value'=>0]);
                 if(is_callable($this->variableInitiator)) ($this->variableInitiator)();
                 
                 $this->normal_data = $obj_model->get();
@@ -398,23 +406,27 @@ class SSP{
         if(is_array($keyValueArr)){
             $this->variables = array_keys($keyValueArr);
             $this->variableInitiator = function() use($keyValueArr){
-                try {
-                    DB::transaction(function() use($keyValueArr){
-                        foreach($keyValueArr as $key=>$value){
-                            DB::unprepared(DB::raw("SET @$key:=$value"));
-                            DB::unprepared(DB::raw("SET @$key"."2:=$value"));
-                        }
-                    });
-                
-                    DB::commit();
-                } catch (\Exception $e){ 
-                    DB::rollback();
-                    dd($e->getMessage());
-                }
+                foreach($keyValueArr as $key=>$value) $keyValueArr[$key."2"] = $value;
+                $this->setDBVariable($keyValueArr);
             };
         }
         
         return $this;
+    }
+    
+    private function setDBVariable($keyValueArr){
+        if(is_array($keyValueArr)){
+            try {
+                DB::transaction(function() use($keyValueArr){
+                    foreach($keyValueArr as $key=>$value) DB::unprepared(DB::raw("SET @$key:=$value"));
+                });
+            
+                DB::commit();
+            } catch (\Exception $e){ 
+                DB::rollback();
+                dd($e->getMessage());
+            }
+        }
     }
     
     private function getColumnNameWithoutOriTable($column_name){
