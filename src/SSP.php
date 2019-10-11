@@ -147,8 +147,6 @@ class SSP{
                     if($e_qry[0] == "and") $obj_model = $obj_model->where($e_qry[1]);
                     elseif($e_qry[0] == "or") $obj_model = $obj_model->orWhere($e_qry[1]);
                 }
-                
-                foreach($this->custom_query as $each_query) $each_query($obj_model);
 
                 if(!empty($this->group_by)){
                     $gb = $this->group_by;
@@ -174,6 +172,8 @@ class SSP{
                 }else $this->total_count = $obj_model->count();
 
                 if(!$this->is_model) $obj_model = DB::query()->fromSub($obj_model, $this->table_prefix . $this->table);
+
+                foreach($this->custom_query as $each_query) $each_query($obj_model);
 
                 if(!empty($req['search']['value'])){
                     if(is_callable($this->variableInitiator)) ($this->variableInitiator)();
