@@ -35,6 +35,7 @@ class SSP{
     private $filter_count;
     private $where_query=[];
     private $join_query=[];
+    private $custom_query=[];
     private $with_related_table;
     private $group_by;
     private $order;
@@ -171,6 +172,8 @@ class SSP{
                 }else $this->total_count = $obj_model->count();
 
                 if(!$this->is_model) $obj_model = DB::query()->fromSub($obj_model, $this->table_prefix . $this->table);
+
+                foreach($this->custom_query as $each_query) $each_query($obj_model);
 
                 if(!empty($req['search']['value'])){
                     if(is_callable($this->variableInitiator)) ($this->variableInitiator)();
@@ -349,6 +352,13 @@ class SSP{
         }else $is_model = true;
         
         $this->is_model = $is_model ?? false;
+        
+        return $this;
+    }
+    
+    public function customQuery($custom_query){
+        
+        if(is_callable($custom_query)) array_push($this->custom_query, $custom_query);
         
         return $this;
     }
