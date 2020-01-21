@@ -38,6 +38,7 @@ class SSP{
     private $custom_query=[];
     private $with_related_table;
     private $group_by;
+	private $dbOrderBy=[];
     private $order;
     private $theSearchKeywordFormatter;
     private $variables=[];
@@ -176,6 +177,7 @@ class SSP{
                 }else $this->total_count = $obj_model->count();
                 
                 foreach($this->custom_query as $each_query) $each_query($obj_model);
+				foreach($this->dbOrderBy as $e_dbob) $obj_model = $obj_model->orderBy($e_dbob[0], $e_dbob[1]);
 
                 if(!$this->is_model){
                     if($this->is_have_counter_variable) $obj_model = DB::query()->select(["*", DB::raw("(@sd_counter_value:=@sd_counter_value+1) AS `sd_counter_value`")])->fromSub($obj_model, $this->table_prefix . $this->table);
@@ -382,6 +384,12 @@ class SSP{
         
         return $this;
     }
+	
+	public function dbOrderBy($column, $sort){
+		array_push($this->dbOrderBy, [$column, $sort]);
+		
+		return $this;
+	}
     
     public function order($dt, $sort){
         $this->order = [[$dt, $sort]];
