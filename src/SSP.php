@@ -84,13 +84,13 @@ class SSP{
             
                     if(!in_array($e_col['db'], $this->special_cols)){
                         if(!in_array($e_col_db_name, $this->cols_arr)) array_push($this->cols_arr, $e_col_db_name);
+                        
+                        $e_cdn_arr = explode('.', $cols[$e_key]['db']);
+                        array_push($this->cols_raw_arr, '`' . $this->table_prefix.$e_cdn_arr[0] . '`.`' . $e_cdn_arr[1] . '`');
+                        if($e_searchable) array_push($this->cols_filter_raw_arr, '`' . $this->table_prefix.$e_cdn_arr[0] . '`.`' . $e_cdn_arr[1] . '`');
                     }else $this->is_have_counter_variable = true;
                     
                     $cols[$e_key]['db'] =  sd_get_array_last(explode(" AS ", $e_col_db_name));
-                    
-                    $e_cdn_arr = explode('.', $cols[$e_key]['db']);
-                    array_push($this->cols_raw_arr, '`' . $this->table_prefix.$e_cdn_arr[0] . '`.`' . $e_cdn_arr[1] . '`');
-                    if($e_searchable) array_push($this->cols_filter_raw_arr, '`' . $this->table_prefix.$e_cdn_arr[0] . '`.`' . $e_cdn_arr[1] . '`');
                 }
             }
             if(!isset($e_col['dt'])) $cols[$e_key]['dt'] = null; 
@@ -133,7 +133,12 @@ class SSP{
                     $replaced_variables = [];
                     foreach($this->variables as $variable) $replaced_variables["@$variable"] = "@$variable"."2";
                     
-                    $col_search_str = "CONCAT(COALESCE(". strtr(implode($this->cols_filter_raw_arr, ",''),' ',COALESCE("), $replaced_variables) .",'')) AS `filter_col`";
+                    $replaced_variables_fixed = [
+                        //'COALESCE(`gn_users`.`sd_counter_value`,\'\')' => '@sd_counter_value',
+                    ];
+                    
+                    $col_search_str = strtr("CONCAT(COALESCE(". strtr(implode($this->cols_filter_raw_arr, ",''),' ',COALESCE("), $replaced_variables) .",'')) AS `filter_col`", $replaced_variables_fixed);
+                    
                     array_push($extra_cols, DB::raw($col_search_str));
                 }
                 
@@ -190,8 +195,13 @@ class SSP{
                     $query_search_value = '%'.$req['search']['value'].'%';
                     if($this->is_model) $obj_model = $obj_model->having('filter_col', 'LIKE', $query_search_value);
                     else $obj_model = $obj_model->where('filter_col', 'LIKE', $query_search_value);
-                    //$this->filter_count = $obj_model->count();
-                    $this->filter_count = DB::select("SELECT count(*) AS `c` FROM (".$obj_model->toSql().") AS `temp_count_table`", array_merge($obj_model->getBindings(), [$query_search_value]))[0]->c;
+                    if($this->is_have_counter_variable) $obj_model->orWhere('sd_counter_value', 'LIKE', $query_search_value);
+                
+                    $sql_str = "SELECT count(*) AS `c` FROM (".$obj_model->toSql().") AS `temp_count_table`";
+                    $sql_bindings_params = array_merge($obj_model->getBindings(), [$query_search_value]);
+                    //dd(\Str::replaceArray('?', $sql_bindings_params, $sql_str));
+                    $this->filter_count = DB::select($sql_str, $sql_bindings_params)[0]->c;
+                    
                 }else{
                     $this->filter_count = $this->total_count;
                 }
