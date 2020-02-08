@@ -81,16 +81,18 @@ class SSP{
                         if($e_col_arr[0] != $this->table) $e_col_db_name .= " AS ".$e_col_arr[0].".".$e_col_arr[1];
                     }
                     else $e_col_db_name = $this->table . '.' . $e_col['db'];
+					
+					$cols[$e_key]['db'] =  sd_get_array_last(explode(" AS ", $e_col_db_name));
             
                     if(!in_array($e_col['db'], $this->special_cols)){
                         if(!in_array($e_col_db_name, $this->cols_arr)) array_push($this->cols_arr, $e_col_db_name);
-                        
+						
                         $e_cdn_arr = explode('.', $cols[$e_key]['db']);
                         array_push($this->cols_raw_arr, '`' . $this->table_prefix.$e_cdn_arr[0] . '`.`' . $e_cdn_arr[1] . '`');
                         if($e_searchable) array_push($this->cols_filter_raw_arr, '`' . $this->table_prefix.$e_cdn_arr[0] . '`.`' . $e_cdn_arr[1] . '`');
                     }else $this->is_have_counter_variable = true;
                     
-                    $cols[$e_key]['db'] =  sd_get_array_last(explode(" AS ", $e_col_db_name));
+                    
                 }
             }
             if(!isset($e_col['dt'])) $cols[$e_key]['dt'] = null; 
