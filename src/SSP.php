@@ -160,28 +160,7 @@ class SSP{
                     elseif($e_qry[0] == "or") $obj_model = $obj_model->orWhere($e_qry[1]);
                 }
 
-                if(!empty($this->group_by)){
-                    $gb = $this->group_by;
-                    
-                    if(is_a($gb, get_class(DB::raw('')))){
-                        $distinct = explode(" AS ", $gb->getValue())[0];
-                        $gb = DB::raw($distinct);
-                    }else{
-                        $gb_arr = explode(".", $gb);
-                        if(count($gb_arr) > 1){
-                            $table  = $this->table_prefix . $gb_arr[0];
-                            $column = $gb_arr[1];
-                            
-                        }else{
-                            $table  = $this->table_prefix . $this->table;
-                            $column = $gb_arr[0];
-                        }
-                        $distinct = "`$table`.`$column`";
-                    }                    
-                        
-                    $this->total_count = $obj_model->count(DB::raw("DISTINCT $distinct"));
-                    $obj_model = $obj_model->groupBy($gb);
-                }else $this->total_count = $obj_model->count();
+                if(!empty($this->group_by)) $obj_model = $obj_model->groupBy($this->group_by);
                 
                 foreach($this->custom_query as $each_query) $each_query($obj_model);
 				foreach($this->dbOrderBy as $e_dbob) $obj_model = $obj_model->orderBy($e_dbob[0], $e_dbob[1]);
@@ -190,6 +169,8 @@ class SSP{
                     if($this->is_have_counter_variable) $obj_model = DB::query()->select(["*", DB::raw("(@sd_counter_value:=@sd_counter_value+1) AS `sd_counter_value`")])->fromSub($obj_model, $this->table_prefix . $this->table);
                     $obj_model = DB::query()->fromSub($obj_model, $this->table_prefix . $this->table);
                 }
+
+                $this->total_count = DB::select("SELECT count(*) AS `c` FROM (".$obj_model->toSql().") AS `temp_count_table`", $obj_model->getBindings())[0]->c;
 
                 if(!empty($req['search']['value'])){
                     if(is_callable($this->variableInitiator)) ($this->variableInitiator)();
