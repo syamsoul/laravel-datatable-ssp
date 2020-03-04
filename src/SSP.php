@@ -188,8 +188,8 @@ class SSP{
                     if(is_callable($this->variableInitiator)) ($this->variableInitiator)();
                     
                     $query_search_value = '%'.$req['search']['value'].'%';
-                    if($this->query_from_what == 'model') $obj_model = $obj_model->having('filter_col', 'LIKE', $query_search_value);
-                    else $obj_model = $obj_model->where('filter_col', 'LIKE', $query_search_value);
+                    if($this->query_from_what == 'table_name') $obj_model = $obj_model->where('filter_col', 'LIKE', $query_search_value);
+                    else $obj_model = $obj_model->having('filter_col', 'LIKE', $query_search_value);
                 
                     $sql_str = "SELECT count(*) AS `c` FROM (".$obj_model->toSql().") AS `temp_count_table`";
                     $sql_bindings_params = array_merge($obj_model->getBindings(), [$query_search_value]);
