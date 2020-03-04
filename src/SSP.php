@@ -16,8 +16,8 @@ class SSP{
     |
     */
     
-    private $model;
-    private $is_model=true;
+    private $query_object;
+    private $query_from_what='model';
     private $table;
     private $table_prefix;
     private $request;
@@ -43,20 +43,29 @@ class SSP{
     private $theSearchKeywordFormatter;
     private $variables=[];
     private $variableInitiator;
-    private $special_cols=['sd_counter_value'];
-    private $is_have_counter_variable = false;
     
-    function __construct($model, $cols){
+    function __construct($model, $cols)
+    {
         $this->table_prefix = DB::getTablePrefix() ?? "";
                 
         $this->request  = request()->all();
-             
-        if(class_exists($model)){
-            $this->model    = $model;
-            $this->table = (new $model())->getTable();
+        
+        if(is_string($model)){
+            if(class_exists($model)){
+                $this->query_object = $model;
+                $this->table = (new $model())->getTable();
+            }else{
+                $this->table = $model;
+                $this->query_from_what = 'table_name';
+            }
         }else{
-            $this->table = $model;
-            $this->is_model = false;
+            if(is_a($model, 'Illuminate\Database\Query\Builder') || is_a($model, 'Illuminate\Database\Eloquent\Builder')){
+                $this->query_object = $model;
+                $this->table = 'temp_main_primary_table';
+                $this->query_from_what = 'sub_query';
+            }else{
+                $this->error('Failed to initiate.');
+            }
         }
 
         foreach($cols as $e_key => $e_col){
@@ -84,15 +93,11 @@ class SSP{
 					
 					$cols[$e_key]['db'] =  sd_get_array_last(explode(" AS ", $e_col_db_name));
             
-                    if(!in_array($e_col['db'], $this->special_cols)){
-                        if(!in_array($e_col_db_name, $this->cols_arr)) array_push($this->cols_arr, $e_col_db_name);
-						
-                        $e_cdn_arr = explode('.', $cols[$e_key]['db']);
-                        array_push($this->cols_raw_arr, '`' . $this->table_prefix.$e_cdn_arr[0] . '`.`' . $e_cdn_arr[1] . '`');
-                        if($e_searchable) array_push($this->cols_filter_raw_arr, '`' . $this->table_prefix.$e_cdn_arr[0] . '`.`' . $e_cdn_arr[1] . '`');
-                    }else $this->is_have_counter_variable = true;
+                    if(!in_array($e_col_db_name, $this->cols_arr)) array_push($this->cols_arr, $e_col_db_name);
                     
-                    
+                    $e_cdn_arr = explode('.', $cols[$e_key]['db']);
+                    array_push($this->cols_raw_arr, '`' . $this->table_prefix.$e_cdn_arr[0] . '`.`' . $e_cdn_arr[1] . '`');
+                    if($e_searchable) array_push($this->cols_filter_raw_arr, '`' . $this->table_prefix.$e_cdn_arr[0] . '`.`' . $e_cdn_arr[1] . '`');
                 }
             }
             if(!isset($e_col['dt'])) $cols[$e_key]['dt'] = null; 
@@ -112,7 +117,9 @@ class SSP{
         }
     }
     
-    public function getInfo(){
+    
+    public function getInfo()
+    {
         $ret = [
             'labels'    => [],
             'order'     => $this->order ?? [[0, 'asc']],
@@ -122,7 +129,9 @@ class SSP{
         return $ret;
     }
     
-    public function getNormalData(){
+    
+    public function getNormalData()
+    {
         
         if(empty($this->normal_data)){
             $req = $this->request;
@@ -145,14 +154,18 @@ class SSP{
                 }
                 
                 $the_cols = array_merge($this->cols_arr, $extra_cols);
-                if($this->is_model){
-                    if(empty($this->with_related_table)) $obj_model = ($this->model)::select($the_cols);
-                    else $obj_model = ($this->model)::with($this->with_related_table)->select($the_cols);
-                }else{
+                if($this->query_from_what == 'model'){
+                    if(empty($this->with_related_table)) $obj_model = ($this->query_object)::select($the_cols);
+                    else $obj_model = ($this->query_object)::with($this->with_related_table)->select($the_cols);
+                }elseif($this->query_from_what == 'table_name'){
                     $obj_model = DB::table($this->table)->select($the_cols);
                     if(!empty($this->join_query)) foreach($this->join_query as $e_jqry){
                         if($e_jqry[0] == "left") $obj_model = $obj_model->leftJoinSub($e_jqry[1], $e_jqry[2], $e_jqry[3]);
                     }
+                }elseif($this->query_from_what == 'sub_query'){
+                    $obj_model = DB::query()->select($the_cols)->fromSub($this->query_object, $this->table_prefix . $this->table);
+                }else{
+                    $this->error('Failed to query.');
                 }
                 
                 if(!empty($this->where_query)) foreach($this->where_query as $e_qry){
@@ -165,8 +178,7 @@ class SSP{
                 foreach($this->custom_query as $each_query) $each_query($obj_model);
 				foreach($this->dbOrderBy as $e_dbob) $obj_model = $obj_model->orderBy($e_dbob[0], $e_dbob[1]);
 
-                if(!$this->is_model){
-                    if($this->is_have_counter_variable) $obj_model = DB::query()->select(["*", DB::raw("(@sd_counter_value:=@sd_counter_value+1) AS `sd_counter_value`")])->fromSub($obj_model, $this->table_prefix . $this->table);
+                if($this->query_from_what == 'table_name'){
                     $obj_model = DB::query()->fromSub($obj_model, $this->table_prefix . $this->table);
                 }
 
@@ -176,9 +188,8 @@ class SSP{
                     if(is_callable($this->variableInitiator)) ($this->variableInitiator)();
                     
                     $query_search_value = '%'.$req['search']['value'].'%';
-                    if($this->is_model) $obj_model = $obj_model->having('filter_col', 'LIKE', $query_search_value);
+                    if($this->query_from_what == 'model') $obj_model = $obj_model->having('filter_col', 'LIKE', $query_search_value);
                     else $obj_model = $obj_model->where('filter_col', 'LIKE', $query_search_value);
-                    if($this->is_have_counter_variable) $obj_model->orWhere('sd_counter_value', 'LIKE', $query_search_value);
                 
                     $sql_str = "SELECT count(*) AS `c` FROM (".$obj_model->toSql().") AS `temp_count_table`";
                     $sql_bindings_params = array_merge($obj_model->getBindings(), [$query_search_value]);
@@ -196,7 +207,9 @@ class SSP{
                 if($req['length'] > -1) $obj_model = $obj_model->offset($req['start'])->limit($req['length']);
                 //dd($obj_model->toSql());
                 
-                $this->setDBVariable(['sd_counter_value'=>0]);
+                DB::disconnect(config('database.default'));
+                DB::reconnect(config('database.default'));
+                
                 if(is_callable($this->variableInitiator)) ($this->variableInitiator)();
                 
                 $this->normal_data = $obj_model->get();
@@ -208,7 +221,9 @@ class SSP{
         return $this->normal_data;
     }
     
-    public function getDtArr(){
+    
+    public function getDtArr()
+    {
         $ret_data = [];
         if(empty($this->dt_arr)){
             $req = $this->request;
@@ -269,7 +284,9 @@ class SSP{
         return $this->dt_arr;
     }
     
-    public function where(...$params){
+    
+    public function where(...$params)
+    {
         $ret_query = false;
         
         if(is_callable($params[0])){
@@ -289,7 +306,9 @@ class SSP{
         return $this;
     }
     
-    public function orWhere(...$params){
+    
+    public function orWhere(...$params)
+    {
         $ret_query = false;
         
         if(is_callable($params[0])){
@@ -309,7 +328,9 @@ class SSP{
         return $this;
     }
     
-    public function leftJoin($table, ...$columns){
+    
+    public function leftJoin($table, ...$columns)
+    {
         if(isset($columns[0]) && is_callable($columns[0])){
             $extend_query = $columns[0];
             unset($columns[0]); 
@@ -352,49 +373,61 @@ class SSP{
                     $join->on($columns[0], '=', $columns[1]);
                 }
             ]);
-        }else $is_model = true;
-        
-        $this->is_model = $is_model ?? false;
+        }
         
         return $this;
     }
     
-    public function customQuery($custom_query){
+    
+    public function customQuery($custom_query)
+    {
         
         if(is_callable($custom_query)) array_push($this->custom_query, $custom_query);
         
         return $this;
     }
     
-    public function with($related_table){
+    
+    public function with($related_table)
+    {
         $this->with_related_table = $related_table;
         
         return $this;
     }
     
-    public function groupBy($group_by){
+    
+    public function groupBy($group_by)
+    {
         $this->group_by = $group_by;
         
         return $this;
     }
 	
-	public function dbOrderBy($column, $sort){
+    
+	public function dbOrderBy($column, $sort)
+    {
 		array_push($this->dbOrderBy, [$column, $sort]);
 		
 		return $this;
 	}
     
-    public function order($dt, $sort){
+    
+    public function order($dt, $sort)
+    {
         $this->order = [[$dt, $sort]];
         
         return $this;
     }
     
-    public function sort($dt, $sort){
+    
+    public function sort($dt, $sort)
+    {
         return $this->order($dt, $sort);
     }
     
-    public function searchKeywordFormatter($formatter){
+    
+    public function searchKeywordFormatter($formatter)
+    {
         if(is_callable($formatter)){
             $this->theSearchKeywordFormatter = $formatter;
         }
@@ -402,7 +435,9 @@ class SSP{
         return $this;
     }
     
-    public function initVariable($keyValueArr){
+    
+    public function initVariable($keyValueArr)
+    {
         
         if(is_array($keyValueArr)){
             $this->variables = array_keys($keyValueArr);
@@ -415,7 +450,9 @@ class SSP{
         return $this;
     }
     
-    private function setDBVariable($keyValueArr){
+    
+    private function setDBVariable($keyValueArr)
+    {
         if(is_array($keyValueArr)){
             try {
                 DB::transaction(function() use($keyValueArr){
@@ -430,7 +467,9 @@ class SSP{
         }
     }
     
-    private function getColumnNameWithoutOriTable($column_name){
+    
+    private function getColumnNameWithoutOriTable($column_name)
+    {
         $cn_arr = explode('.', $column_name);
         
         if(count($cn_arr) > 1){
@@ -438,6 +477,12 @@ class SSP{
         }
         
         return $column_name;
+    }
+    
+    
+    private function error($error_text)
+    {
+        dd("syamsoul/laravel-datatable-ssp: $error_text");
     }
 }
 
