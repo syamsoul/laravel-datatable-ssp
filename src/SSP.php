@@ -148,7 +148,7 @@ class SSP{
                         //'COALESCE(`gn_users`.`sd_counter_value`,\'\')' => '@sd_counter_value',
                     ];
                     
-                    $col_search_str = strtr("CONCAT(COALESCE(". strtr(implode($this->cols_filter_raw_arr, ",''),' ',COALESCE("), $replaced_variables) .",'')) AS `filter_col`", $replaced_variables_fixed);
+                    $col_search_str = strtr("CONCAT(COALESCE(". strtr(implode(",''),' ',COALESCE(", $this->cols_filter_raw_arr), $replaced_variables) .",'')) AS `filter_col`", $replaced_variables_fixed);
                     
                     array_push($extra_cols, DB::raw($col_search_str));
                 }
