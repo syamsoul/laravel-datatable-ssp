@@ -43,6 +43,7 @@ class SSP{
     private $theSearchKeywordFormatter;
     private $variables=[];
     private $variableInitiator;
+    private $is_count_records = true;
     
     function __construct($model, $cols)
     {
@@ -182,7 +183,7 @@ class SSP{
                     $obj_model = DB::query()->fromSub($obj_model, $this->table_prefix . $this->table);
                 }
 
-                $this->total_count = DB::select("SELECT count(*) AS `c` FROM (".$obj_model->toSql().") AS `temp_count_table`", $obj_model->getBindings())[0]->c;
+                if($this->is_count_records) $this->total_count = DB::select("SELECT count(*) AS `c` FROM (".$obj_model->toSql().") AS `temp_count_table`", $obj_model->getBindings())[0]->c;
 
                 if(!empty($req['search']['value'])){
                     if(is_callable($this->variableInitiator)) ($this->variableInitiator)();
@@ -191,13 +192,15 @@ class SSP{
                     if($this->query_from_what == 'table_name') $obj_model = $obj_model->where('filter_col', 'LIKE', $query_search_value);
                     else $obj_model = $obj_model->having('filter_col', 'LIKE', $query_search_value);
                 
-                    $sql_str = "SELECT count(*) AS `c` FROM (".$obj_model->toSql().") AS `temp_count_table`";
-                    $sql_bindings_params = array_merge($obj_model->getBindings(), [$query_search_value]);
-                    //dd(\Str::replaceArray('?', $sql_bindings_params, $sql_str));
-                    $this->filter_count = DB::select($sql_str, $sql_bindings_params)[0]->c;
+                    if($this->is_count_records){
+                        $sql_str = "SELECT count(*) AS `c` FROM (".$obj_model->toSql().") AS `temp_count_table`";
+                        $sql_bindings_params = array_merge($obj_model->getBindings(), [$query_search_value]);
+                        //dd(\Str::replaceArray('?', $sql_bindings_params, $sql_str));
+                        $this->filter_count = DB::select($sql_str, $sql_bindings_params)[0]->c;
+                    }
                     
                 }else{
-                    $this->filter_count = $this->total_count;
+                    if($this->is_count_records) $this->filter_count = $this->total_count;
                 }
                 
                 $clean_col_name = $this->getColumnNameWithoutOriTable($cdtk[$req['order'][0]['column']]['db']);
@@ -275,10 +278,13 @@ class SSP{
             
             $this->dt_arr = [
                 'draw' => $req['draw'] ?? 0,
-                'recordsTotal' => $this->total_count,
-                'recordsFiltered' => $this->filter_count,
                 'data' => $ret_data,
             ];
+            
+            if($this->is_count_records){
+                $this->dt_arr['recordsTotal'] = $this->total_count;
+                $this->dt_arr['recordsFiltered'] = $this->filter_count;
+            }
         }
         
         return $this->dt_arr;
@@ -446,6 +452,14 @@ class SSP{
                 $this->setDBVariable($keyValueArr);
             };
         }
+        
+        return $this;
+    }
+    
+    
+    public function disableCountRecords()
+    {
+        $this->is_count_records = false;
         
         return $this;
     }
