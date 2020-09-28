@@ -164,7 +164,10 @@ class SSP{
                         if($e_jqry[0] == "left") $obj_model = $obj_model->leftJoinSub($e_jqry[1], $e_jqry[2], $e_jqry[3]);
                     }
                 }elseif($this->query_from_what == 'sub_query'){
-                    $obj_model = DB::query()->select($the_cols)->fromSub($this->query_object, $this->table_prefix . $this->table);
+                    
+                    if(config('sd-datatable-ssp.subquery.alias_has_prefix')) $temp_full_table = $this->table_prefix . $this->table;
+                    else $temp_full_table = $this->table;
+                    $obj_model = DB::query()->select($the_cols)->fromSub($this->query_object, $temp_full_table);
                 }else{
                     $this->error('Failed to query.');
                 }
