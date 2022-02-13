@@ -5,7 +5,7 @@
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/syamsoul/laravel-datatable-ssp.svg?style=flat-square)](https://packagist.org/packages/syamsoul/laravel-datatable-ssp)
 
 
-***IMPORTANT:*** Please use the new version of our DataTable SSP ([Laravel DataTableTwo SSP](https://github.com/syamsoul/laravel-datatable-ssp)).
+***IMPORTANT:*** Please use the new version of our DataTable SSP ([Laravel DataTableTwo SSP](https://github.com/syamsoul/laravel-datatable-two-ssp)).
 
 &nbsp;
 &nbsp;
