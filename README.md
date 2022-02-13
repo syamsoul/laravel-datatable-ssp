@@ -5,7 +5,10 @@
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/syamsoul/laravel-datatable-ssp.svg?style=flat-square)](https://packagist.org/packages/syamsoul/laravel-datatable-ssp)
 
 
+***IMPORTANT:*** Please use the new version of our DataTable SSP ([Laravel DataTableTwo SSP](https://github.com/syamsoul/laravel-datatable-ssp)).
 
+&nbsp;
+&nbsp;
 This package allows you to manage your DataTable from server-side in Laravel app (inspired by [original DataTable SSP](https://github.com/DataTables/DataTablesSrc/blob/master/examples/server_side/scripts/ssp.class.php)).
 
 
@@ -16,14 +19,14 @@ You can refer [here (click here)](https://datatables.net/examples/data_sources/s
 * [Requirement](#requirement)
 * [Installation](#installation)
 * [Usage & Reference](#usage--reference)
-  * [How to use it?](#how-to-use-it)
-  * [Ordering/Sorting](#orderingsorting)
-  * [Where/OrWhere](#whereorwhere)
-  * [With Relationship](#with-relationship)
-  * [Left Join](#left-join)
+* [How to use it?](#how-to-use-it)
+* [Ordering/Sorting](#orderingsorting)
+* [Where/OrWhere](#whereorwhere)
+* [With Relationship](#with-relationship)
+* [Left Join](#left-join)
 * [Example](#example)
-  * [In PHP (Controller)](#in-php-controller)
-  * [In Blade (Views)](#in-blade-views)
+* [In PHP (Controller)](#in-php-controller)
+* [In Blade (Views)](#in-blade-views)
 
 
 &nbsp;
@@ -70,19 +73,19 @@ $my_ssp = new SSP(String $model, Array $dt_cols_opt);
 
 Which is:
 * `$model` is a string of your model name or table name, for example:
-  ```php
-  $model = '\App\User';
-  //or
-  $model = 'users'; // NOTE: you should not include the prefix
-  ```
+```php
+$model = '\App\User';
+//or
+$model = 'users'; // NOTE: you should not include the prefix
+```
 * `$dt_cols_opt` is an array of your columns' options, for example:
-   ```php
-   $dt_cols_opt = [
-       ['label'=>'ID',         'db'=>'id',            'dt'=>0, 'formatter'=>function($value, $model){ return str_pad($value, 5, '0', STR_PAD_LEFT); }],
-       ['label'=>'Username',   'db'=>'uname',         'dt'=>1],
-       ['label'=>'Email',      'db'=>'email',         'dt'=>2],
-   ];
-   ```
+```php
+$dt_cols_opt = [
+    ['label'=>'ID',         'db'=>'id',            'dt'=>0, 'formatter'=>function($value, $model){ return str_pad($value, 5, '0', STR_PAD_LEFT); }],
+    ['label'=>'Username',   'db'=>'uname',         'dt'=>1],
+    ['label'=>'Email',      'db'=>'email',         'dt'=>2],
+];
+```
 &nbsp;
 
 The available columns' options are as below:
@@ -98,35 +101,35 @@ The available columns' options are as below:
 
 Which is:
 * `$dt_col_header` is the header of the column (at the table in views/blade), for example:
-    ```php
-    $dt_col_header = 'Username';
-    ```
+```php
+$dt_col_header = 'Username';
+```
 * `$db_col_name` is column name based on the DB, for example:
-    ```php
-    $db_col_name = 'uname';
-    ```
+```php
+$db_col_name = 'uname';
+```
 * `$dt_col_position` is the position of the column (at the table in views/blade), start with 0, for example:
-    ```php
-    $dt_col_position = 2;
-    ```
+```php
+$dt_col_position = 2;
+```
 * `$dt_class` is a class/classes name which will be added to the table (in views/blade), for example:
-    ```php
-    $dt_class = 'text-center text-bold';
-    ```
+```php
+$dt_class = 'text-center text-bold';
+```
 * `$dt_formatter` is like a modifier that can modify the data from DB to be shown in views/blade, for example:
-    ```php
-    $dt_formatter = function($value, $model){
-        return ucwords($value); 
-        // which is 'value' is the value of the column
-        
-        // or
-        return $model->name;
-        // which is 'model' is the model of the current row
-        
-        // or
-        return $value . '(#' .$model->id. ')';       
-    };
-    ```
+```php
+$dt_formatter = function($value, $model){
+    return ucwords($value);
+    // which is 'value' is the value of the column
+
+    // or
+    return $model->name;
+    // which is 'model' is the model of the current row
+
+    // or
+    return $value . '(#' .$model->id. ')';       
+};
+```
 
 &nbsp;
 ### Ordering/Sorting
@@ -211,21 +214,21 @@ class UsersController extends Controller
     public function list()
     {        
         $dt_obj = $this->dtSsp();
-        
+
         return view('admin-panel.users-list', [
             'dt_info'       => $dt_obj->getInfo(),
         ]);
     }
-    
-    
+
+
     public function get($id=null)
     {
         $dt_obj = $this->dtSsp();
-        
+
         return response()->json($dt_obj->getDtArr());
     }
-    
-    
+
+
     private function dtSsp()
     {
         $dt = [
@@ -233,12 +236,12 @@ class UsersController extends Controller
             ['label'=>'Email',      'db'=>'email',         'dt'=>2],
             ['label'=>'Username',   'db'=>'uname',         'dt'=>1],
             ['label'=>'Created At', 'db'=>'created_at',    'dt'=>3],
-            ['label'=>'Action',     'db'=>'id',            'dt'=>4, 'formatter'=>function($value, $model){ 
+            ['label'=>'Action',     'db'=>'id',            'dt'=>4, 'formatter'=>function($value, $model){
                 $btns = [
                     '<button onclick="edit(\''.$value.'\');">Edit</button>',
                     '<button onclick="delete(\''.$value.'\');">Delete</button>',
                 ];
-                return implode($btns, " "); 
+                return implode($btns, " ");
             }],
             ['db'=>'email_verified_at'],
         ];
@@ -260,23 +263,23 @@ class UsersController extends Controller
     <body>
         <table id="datatable_1" class="table table-striped table-bordered" style="width:100%;"></table>
         <script>
-            $(document).ready(function(){
-                $('#datatable_1').DataTable({
-                    processing: true,
-                    serverSide: true,
-                    ajax: 'http://your-website.com/users/get',
-                    columns: {!!json_encode($dt_info['labels'])!!},
-                    order: {!!json_encode($dt_info['order'])!!},
-                });
+        $(document).ready(function(){
+            $('#datatable_1').DataTable({
+                processing: true,
+                serverSide: true,
+                ajax: 'http://your-website.com/users/get',
+                columns: {!!json_encode($dt_info['labels'])!!},
+                order: {!!json_encode($dt_info['order'])!!},
             });
-            
-            function edit(id){
-                alert('edit for user with id '+id);
-            }
-            
-            function delete(id){
-                alert('delete user with id '+id);
-            }
+        });
+
+        function edit(id){
+            alert('edit for user with id '+id);
+        }
+
+        function delete(id){
+            alert('delete user with id '+id);
+        }
         </script>
     </body>
 </html>    
@@ -286,11 +289,9 @@ class UsersController extends Controller
 &nbsp;
 ## Support me
 
-I am a passionate programmer. Please support me and I will continue to contribute my code to the world to make the  world better. :')
+Please support me and I will contribute more code.
 
-Please [make a donation](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=syamsoulazrien.miat@gmail.com&lc=US&item_name=Support%20me%20and%20I%20will%20contribute%20more&no_note=0&cn=&curency_code=USD&bn=PP-DonationsBF:btn_donateCC_LG.gif:NonHosted). :')
-
-&#35;MalaysiaBoleh
+Please [make a donation](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=syamsoulazrien.miat@gmail.com&lc=US&item_name=Support%20me%20and%20I%20will%20contribute%20more&no_note=0&cn=&curency_code=USD&bn=PP-DonationsBF:btn_donateCC_LG.gif:NonHosted).
 
 &nbsp;
 &nbsp;
