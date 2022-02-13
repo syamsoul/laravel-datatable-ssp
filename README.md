@@ -9,6 +9,7 @@
 
 &nbsp;
 &nbsp;
+
 This package allows you to manage your DataTable from server-side in Laravel app (inspired by [original DataTable SSP](https://github.com/DataTables/DataTablesSrc/blob/master/examples/server_side/scripts/ssp.class.php)).
 
 
