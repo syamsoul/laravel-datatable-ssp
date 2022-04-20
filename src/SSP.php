@@ -198,7 +198,7 @@ class SSP{
                     if($this->is_count_records){
                         $sql_str = "SELECT count(*) AS `c` FROM (".$obj_model->toSql().") AS `temp_count_table`";
                         if(config('sd-datatable-ssp.search.merge_params_binding', true)) $sql_bindings_params = array_merge($obj_model->getBindings(), [$query_search_value]);
-                        $sql_bindings_params = $obj_model->getBindings();
+                        else $sql_bindings_params = $obj_model->getBindings();
                         //dd(\Str::replaceArray('?', $sql_bindings_params, $sql_str));
                         $this->filter_count = DB::select($sql_str, $sql_bindings_params)[0]->c;
                     }
