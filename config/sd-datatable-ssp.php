@@ -6,4 +6,7 @@ return [
     'leftjoin' => [
         'alias_has_prefix' => false,
     ],
+    'search' => [
+        'merge_params_binding' => true,
+    ],
 ];
