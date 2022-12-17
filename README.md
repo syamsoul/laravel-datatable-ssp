@@ -290,9 +290,13 @@ class UsersController extends Controller
 &nbsp;
 ## Support me
 
-Please support me and I will contribute more code.
+PIf you find this package helps you, kindly support me by donating some BNB (BSC) to the address below.
 
-Please [make a donation](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=syamsoulazrien.miat@gmail.com&lc=US&item_name=Support%20me%20and%20I%20will%20contribute%20more&no_note=0&cn=&curency_code=USD&bn=PP-DonationsBF:btn_donateCC_LG.gif:NonHosted).
+```
+0x364d8eA5E7a4ce97e89f7b2cb7198d6d5DFe0aCe
+```
+
+<img src="https://info.souldoit.com/img/wallet-address-bnb-bsc.png" width="150">
 
 &nbsp;
 &nbsp;
