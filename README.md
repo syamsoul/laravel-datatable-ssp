@@ -25,10 +25,6 @@ You can refer [here (click here)](https://datatables.net/examples/data_sources/s
 * [Installation](#installation)
 * [Usage & Reference](#usage--reference)
 * [How to use it?](#how-to-use-it)
-* [Ordering/Sorting](#orderingsorting)
-* [Where/OrWhere](#whereorwhere)
-* [With Relationship](#with-relationship)
-* [Left Join](#left-join)
 * [Example](#example)
 * [In PHP (Controller)](#in-php-controller)
 * [In Blade (Views)](#in-blade-views)
@@ -213,7 +209,7 @@ class UsersController extends Controller
             'columns' => $this->ssp->getFrontEndColumns(),
             'is_search_enable' => $this->ssp->isSearchEnabled(),
             'allowed_items_per_page' => $this->ssp->getAllowedItemsPerPage(),
-            'initialItemsPerPage' => 10,
+            'initial_items_per_page' => 10,
         ]);
     }
 
@@ -245,17 +241,17 @@ class UsersController extends Controller
                     {!! json_encode($allowed_items_per_page) !!},
                     {!! json_encode($allowed_items_per_page) !!}.map(x => (x == -1 ? 'All' : x) ),
                 ],
-                pageLength: {{ $initialItemsPerPage }},
+                pageLength: {{ $initial_items_per_page }},
                 searching: {{ $is_search_enable ? 'true' : 'false' }},
             });
         });
 
         function edit (id) {
-            alert('edit for user with id '+id);
+            alert(`edit for user with id ${id}`);
         }
 
         function delete (id) {
-            alert('delete user with id '+id);
+            alert(`delete user with id ${id}`);
         }
         </script>
     </body>
