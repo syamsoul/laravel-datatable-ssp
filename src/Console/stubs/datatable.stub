@@ -1,0 +1,21 @@
+<?php
+
+namespace {{ namespace }};
+
+use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
+use Illuminate\Database\Query\Builder as QueryBuilder;
+use SoulDoit\DataTable\SSP;
+
+final class {{ class }} extends SSP
+{
+    protected function columns(): array
+    {
+        //
+    }
+
+    protected function query($selected_columns): EloquentBuilder|QueryBuilder
+    {
+        //
+    }
+}
+

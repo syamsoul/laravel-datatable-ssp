@@ -1,0 +1,55 @@
+<?php
+
+namespace {{ namespace }};
+
+use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
+use Illuminate\Database\Query\Builder as QueryBuilder;
+use SoulDoit\DataTable\SSP;
+
+final class {{ class }} extends SSP
+{
+    public function __construct()
+    {
+        // $this->enableSearch();
+        // $this->disableSorting();
+        // $this->disableCount();
+        // $this->allowExportAllItemsInCsv();
+        // $this->setAllowedItemsPerPage([5, 10, 20]);
+        // $this->setFrontendFramework('others');
+    }
+
+    protected function columns(): array
+    {
+        return [
+            ['db' => 'id'],
+            ['db' => 'username'],
+            ['db' => 'created_at'],
+        ];
+    }
+
+    protected function query($selected_columns): EloquentBuilder|QueryBuilder
+    {
+        return \App\Models\User::select($selected_columns);
+    }
+
+    // This is optional. You can remove this method if not needed.
+    protected function queryCustomFilter($query): void
+    {
+        $request = request();
+
+        $request->validate([
+            'filter_date_start' => ['nullable', 'date_format:Y-m-d'],
+            'filter_date_end' => ['nullable', 'date_format:Y-m-d'],
+        ]);
+
+        if ($request->filled('filter_date_start')) $query->where("created_at", '>=', \Illuminate\Support\Carbon::parse($request->filter_date_start)->startOfDay());
+        if ($request->filled('filter_date_end')) $query->where("created_at", '<=', \Illuminate\Support\Carbon::parse($request->filter_date_end)->endOfDay());
+        if ($request->filled('filter_username')) $query->where("username", 'LIKE', "%".$request->filter_username."%");
+    }
+
+    // This is optional. This method can be used to customize count query. You can remove this method if want to use default count query.
+    // protected function queryCount($query): int
+    // {
+    //     return $query->count();
+    // }
+}

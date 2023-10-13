@@ -3,6 +3,8 @@
 namespace SoulDoit\DataTable;
 
 use Illuminate\Support\ServiceProvider;
+use SoulDoit\DataTable\Console;
+use SoulDoit\DataTable\SSP;
 
 class DataTableServiceProvider extends ServiceProvider
 {
@@ -22,6 +24,18 @@ class DataTableServiceProvider extends ServiceProvider
                 __DIR__.'/../config/sd-datatable-ssp.php',
                 'sd-datatable-ssp'
             );
+
+            $this->app->bind(SSP::class);
+
+            foreach (glob(app_path().'/DataTables/*.php') as $filename) {
+                $class = '\\App\\DataTables\\'.basename($filename, '.php');
+            
+                $this->app->bind($class);
+            }
+
+            $this->commands([
+                Console\MakeDatatableCommand::class,
+            ]);
         }
     }
 

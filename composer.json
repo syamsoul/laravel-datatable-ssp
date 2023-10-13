@@ -1,6 +1,6 @@
 {
     "name": "syamsoul/laravel-datatable-ssp",
-    "description": "DataTable SSP (PHP) for Laravel. This package allows you to manage your DataTable from server-side in Laravel app.",
+    "description": "DataTable SSP for Laravel. This package allows you to manage your DataTable from server-side in Laravel app.",
     "keywords": [
         "syamsoul",
         "laravel",
@@ -20,7 +20,7 @@
     ],
     "minimum-stability": "stable",
     "require": {
-        "php": ">=7.1.0"
+        "php": ">=8.2.0"
     },
     "autoload": {
         "psr-4": {

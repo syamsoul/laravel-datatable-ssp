@@ -2,6 +2,9 @@
 
 All notable changes to `laravel-datatable-ssp` will be documented in this file
 
+## 3.0.0 - 2023-10-14
+- Initial release of version 3
+
 ## 2.1.1 - 2019-05-26
 - Debug: `searchKeywordFormatter`
 

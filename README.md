@@ -5,10 +5,14 @@
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/syamsoul/laravel-datatable-ssp.svg?style=flat-square)](https://packagist.org/packages/syamsoul/laravel-datatable-ssp)
 
 
-***IMPORTANT:*** Please use the new version of our DataTable SSP ([Laravel DataTableTwo SSP](https://github.com/syamsoul/laravel-datatable-two-ssp)).
+## Documentation, Installation and Usage Instructions
+
+See the [documentation](https://info.souldoit.com/projects/laravel-datatable-ssp) for detailed installation and usage instructions.
+
 
 &nbsp;
 &nbsp;
+## Introduction
 
 This package allows you to manage your DataTable from server-side in Laravel app (inspired by [original DataTable SSP](https://github.com/DataTables/DataTablesSrc/blob/master/examples/server_side/scripts/ssp.class.php)).
 
@@ -34,7 +38,7 @@ You can refer [here (click here)](https://datatables.net/examples/data_sources/s
 &nbsp;
 ## Requirement
 
-* Currently only tested in Laravel 5.8 (and it works perfectly)
+* Laravel 8.0 and above
 
 
 &nbsp;
@@ -42,7 +46,7 @@ You can refer [here (click here)](https://datatables.net/examples/data_sources/s
 ## Installation
 
 
-This package can be used in Laravel 5.8 or higher. If you are using an older version of Laravel, there's might be some problem. If there's any problem, you can [create new issue](https://github.com/syamsoul/laravel-datatable-ssp/issues) and I will fix it as soon as possible.
+This package can be used in Laravel 8.0 or higher. If you are using an older version of Laravel, there's might be some problem. If there's any problem, you can [create new issue](https://github.com/syamsoul/laravel-datatable-ssp/issues) and I will fix it as soon as possible.
 
 You can install the package via composer:
 
@@ -67,135 +71,87 @@ use SoulDoit\DataTable\SSP;
 ```
 &nbsp;
 
-And then create a new SSP instance:
+And then inject SSP service to Controller's method (or create instance using PHP `new` keyword):
 ```php
-$my_ssp = new SSP(String $model, Array $dt_cols_opt);
+use SoulDoit\DataTable\SSP;
+
+class MyController extends Controller
+{
+    public function get(SSP $ssp)
+    {
+        // or using `new` keyword:
+        // $ssp = new SSP();
+
+        $ssp->setColumns($dt_cols_opt);
+
+        $ssp->setQuery($dt_query);
+
+        return $ssp->response()->json();
+    }
+}
 ```
 
 Which is:
-* `$model` is a string of your model name or table name, for example:
-```php
-$model = '\App\User';
-//or
-$model = 'users'; // NOTE: you should not include the prefix
-```
+* `$dt_query` is a QueryBuilder/EloquentBuilder or callable function that will return QueryBuilder/EloquentBuilder, for example:
+    ```php
+    $ssp->setQuery(function ($selected_columns) {
+        return \App\Models\User::select($selected_columns);
+    });
+    ```
+
 * `$dt_cols_opt` is an array of your columns' options, for example:
-```php
-$dt_cols_opt = [
-    ['label'=>'ID',         'db'=>'id',            'dt'=>0, 'formatter'=>function($value, $model){ return str_pad($value, 5, '0', STR_PAD_LEFT); }],
-    ['label'=>'Username',   'db'=>'uname',         'dt'=>1],
-    ['label'=>'Email',      'db'=>'email',         'dt'=>2],
-];
-```
-&nbsp;
+    ```php
+    $ssp->setColumns([
+        ['label'=>'ID',         'db'=>'id',            'formatter' => function ($value, $model) {
+            return str_pad($value, 5, '0', STR_PAD_LEFT); 
+        }],
+        ['label'=>'Username',   'db'=>'uname'],
+        ['label'=>'Email',      'db'=>'email'],
+    ]);
+    ```
+    &nbsp;
 
-The available columns' options are as below:
-```php
-[   
-    'label'         => $dt_col_header,
-    'db'            => $db_col_name,
-    'dt'            => $dt_col_position,
-    'class'         => $dt_class,
-    'formatter'     => $dt_formatter,
-],
-```
+    The available columns' options are as below:
+    ```php
+    [   
+        'label'         => $dt_col_header,
+        'db'            => $db_col_name,
+        'class'         => $dt_class,
+        'formatter'     => $dt_formatter,
+    ],
+    ```
 
-Which is:
-* `$dt_col_header` is the header of the column (at the table in views/blade), for example:
-```php
-$dt_col_header = 'Username';
-```
-* `$db_col_name` is column name based on the DB, for example:
-```php
-$db_col_name = 'uname';
-```
-* `$dt_col_position` is the position of the column (at the table in views/blade), start with 0, for example:
-```php
-$dt_col_position = 2;
-```
-* `$dt_class` is a class/classes name which will be added to the table (in views/blade), for example:
-```php
-$dt_class = 'text-center text-bold';
-```
-* `$dt_formatter` is like a modifier that can modify the data from DB to be shown in views/blade, for example:
-```php
-$dt_formatter = function($value, $model){
-    return ucwords($value);
-    // which is 'value' is the value of the column
+    Which is:
+    * `$dt_col_header` is the header of the column (at the table in views/blade), for example:
+    ```php
+    $dt_col_header = 'Username';
+    ```
+    * `$db_col_name` is column name based on the DB, for example:
+    ```php
+    $db_col_name = 'uname';
+    ```
+    * `$dt_class` is a class/classes name which will be added to the table (in views/blade), for example:
+    ```php
+    $dt_class = 'text-center';
 
-    // or
-    return $model->name;
-    // which is 'model' is the model of the current row
+    // or use array for multiple classes
 
-    // or
-    return $value . '(#' .$model->id. ')';       
-};
-```
+    $dt_class = ['text-center', 'text-bold'];
+    ```
+    * `$dt_formatter` is like a modifier that can modify the data from DB to be shown in views/blade, for example:
+    ```php
+    $dt_formatter = function ($value, $model) {
+        return ucwords($value);
+        // which is 'value' is the value of the column
 
-&nbsp;
-### Ordering/Sorting
-This is the default ordering for the first time the page is loaded.
-```
-$my_ssp->order($dt_col_position, $ordering);
-```
+        // or
+        return $model->name;
+        // which is 'model' is the model of the current row
 
-Which is:
-* `$dt_col_position` is based on the `dt` value that you set in `$dt_cols_opt` (Please refer above).
-* `$ordering` only have two value whether `asc` or `desc`.
-
-&nbsp;
-### Where/OrWhere
-```
-$my_ssp->where($column_name, $column_value);
-
-// or
-
-$my_ssp->where($column_name, $column_value)->orWhere($column_name, $column_value);
-
-// or
-
-$my_ssp->where($query_function);
-```
-Which is:
-* `$column_name` is the column name based on the database.
-* `$column_value` is the value of the column.
-* `$query_function` is a normal Laravel's query function.
-
-
-&nbsp;
-### With Relationship
-```
-$my_ssp->with($model_relationship);
-```
-Which is:
-* `$model_relationship` is the relationship name applied to the model.
-
-The usage of `with` feature is 100% same with the Laravel's `with`. FYI, `with` is used to `eager load` the relationship's data. You can refer [here (click here)](https://laravel.com/docs/5.8/eloquent-relationships#eager-loading) for more details.
-
-***NOTE:*** `with` feature will **NOT** working if you use `table's name` as the first parameter in constructor. [e.g: `new SSP('users', $dt_cols_opt)` will IGNORE the `with`, but `new SSP('App\User', $dt_cols_opt)` will execute the `with`]
-
-&nbsp;
-### Left Join
-```
-$my_ssp->leftJoin($table_name, $table_one_column, $table_two_column);
-```
-Which is:
-* `$table_name` is the string of the table's name.
-* `$table_one_column` is the column's name from table #1.
-* `$table_two_column` is the column's name from table #2.
-
-
-For example:
-```
-$my_ssp->leftJoin('countries', 'users.country_id', 'countries.id'); // left join `countries` on `users`.`country_id` = `countries`.`id`
-
-// OR
-
-$my_ssp->leftJoin('countries AS ctry', 'users.country_id', 'ctry.id');
-```
-
-***NOTE:*** `leftJoin` feature will **NOT** working if you use `model's name` as the first parameter in constructor. [e.g: `new SSP('App\Countries', $dt_cols_opt)` will IGNORE the `leftJoin`, but `new SSP('countries', $dt_cols_opt)` will execute the `leftJoin`]
-
+        // or
+        return $value . '(#' .$model->id. ')';
+    };
+    ```
 
 &nbsp;
 &nbsp;
@@ -212,32 +168,24 @@ use SoulDoit\DataTable\SSP;
 
 class UsersController extends Controller
 {
-    public function list()
-    {        
-        $dt_obj = $this->dtSsp();
-
-        return view('admin-panel.users-list', [
-            'dt_info'       => $dt_obj->getInfo(),
-        ]);
-    }
-
-
-    public function get($id=null)
+    private $ssp;
+    
+    public function __construct()
     {
-        $dt_obj = $this->dtSsp();
+        $ssp = new SSP();
 
-        return response()->json($dt_obj->getDtArr());
-    }
+        $ssp->enableSearch();
+        $ssp->allowExportAllItemsInCsv();
+        $ssp->setAllowedItemsPerPage([5, 10, 20, -1]);
 
-
-    private function dtSsp()
-    {
-        $dt = [
-            ['label'=>'ID',         'db'=>'id',            'dt'=>0, 'formatter'=>function($value, $model){ return str_pad($value, 5, '0', STR_PAD_LEFT); }],
-            ['label'=>'Email',      'db'=>'email',         'dt'=>2],
-            ['label'=>'Username',   'db'=>'uname',         'dt'=>1],
-            ['label'=>'Created At', 'db'=>'created_at',    'dt'=>3],
-            ['label'=>'Action',     'db'=>'id',            'dt'=>4, 'formatter'=>function($value, $model){
+        $ssp->setColumns([
+            ['label'=>'ID',         'db'=>'id',            'formatter' => function ($value, $model) {
+                return str_pad($value, 5, '0', STR_PAD_LEFT); 
+            }],
+            ['label'=>'Email',      'db'=>'email',         ],
+            ['label'=>'Username',   'db'=>'uname',         ],
+            ['label'=>'Created At', 'db'=>'created_at',    ],
+            ['label'=>'Action',     'db'=>'id',            'formatter' => function ($value, $model) {
                 $btns = [
                     '<button onclick="edit(\''.$value.'\');">Edit</button>',
                     '<button onclick="delete(\''.$value.'\');">Delete</button>',
@@ -245,11 +193,34 @@ class UsersController extends Controller
                 return implode($btns, " ");
             }],
             ['db'=>'email_verified_at'],
-        ];
-        return (new SSP('\App\User', $dt))->where('status','active')->where(function($query){
-            $query->where('id', '!=', 1);
-            $query->orWhere('uname', '!=', 'superadmin');
-        })->order(0, 'desc');
+        ]);
+
+        $ssp->setQuery(function ($selected_columns) {
+            return \App\Models\User::select($selected_columns)
+            ->where('status', 'active')
+            ->where(function ($query) {
+                $query->where('id', '!=', 1);
+                $query->orWhere('uname', '!=', 'superadmin');
+            });
+        });
+        
+        $this->ssp = $ssp;
+    }
+    
+    public function page()
+    {   
+        return view('admin-panel.users-list', [
+            'columns' => $this->ssp->getFrontEndColumns(),
+            'is_search_enable' => $this->ssp->isSearchEnabled(),
+            'allowed_items_per_page' => $this->ssp->getAllowedItemsPerPage(),
+            'initialItemsPerPage' => 10,
+        ]);
+    }
+
+
+    public function get()
+    {
+        return $this->ssp->response()->json();
     }
 }
 ```
@@ -268,22 +239,27 @@ class UsersController extends Controller
             $('#datatable_1').DataTable({
                 processing: true,
                 serverSide: true,
-                ajax: 'http://your-website.com/users/get',
-                columns: {!!json_encode($dt_info['labels'])!!},
-                order: {!!json_encode($dt_info['order'])!!},
+                ajax: '{{ route('users.get') }}',
+                columns: {!! json_encode($columns) !!},
+                lengthMenu: [
+                    {!! json_encode($allowed_items_per_page) !!},
+                    {!! json_encode($allowed_items_per_page) !!}.map(x => (x == -1 ? 'All' : x) ),
+                ],
+                pageLength: {{ $initialItemsPerPage }},
+                searching: {{ $is_search_enable ? 'true' : 'false' }},
             });
         });
 
-        function edit(id){
+        function edit (id) {
             alert('edit for user with id '+id);
         }
 
-        function delete(id){
+        function delete (id) {
             alert('delete user with id '+id);
         }
         </script>
     </body>
-</html>    
+</html>
 ```
 
 &nbsp;
