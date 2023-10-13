@@ -105,7 +105,7 @@ class SSP
     {
         $frontend_framework = $this->getFrontendFramework();
 
-        $arranged_cols_details = $this->getArrangedColsDetails($is_for_csv);
+        $arranged_cols_details = $this->getArrangedColsDetails();
         $db_cols_final = $arranged_cols_details['db_cols_final'];
 
         $col_index = array_flip($db_cols_final)[$db] ?? null;
