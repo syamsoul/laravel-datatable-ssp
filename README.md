@@ -210,6 +210,7 @@ class UsersController extends Controller
             'is_search_enable' => $this->ssp->isSearchEnabled(),
             'allowed_items_per_page' => $this->ssp->getAllowedItemsPerPage(),
             'initial_items_per_page' => 10,
+            'initial_order' => getFrontEndInitialSorting('created_at', true),
         ]);
     }
 
@@ -243,6 +244,7 @@ class UsersController extends Controller
                 ],
                 pageLength: {{ $initial_items_per_page }},
                 searching: {{ $is_search_enable ? 'true' : 'false' }},
+                order: {!! json_encode($initial_order) !!},
             });
         });
 

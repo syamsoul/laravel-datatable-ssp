@@ -10,6 +10,7 @@ use SoulDoit\DataTable\Exceptions\MustHaveDbOrDbFake;
 use SoulDoit\DataTable\Exceptions\DbFakeMustHaveFormatter;
 use SoulDoit\DataTable\Exceptions\RawExpressionMustHaveAliasName;
 use SoulDoit\DataTable\Exceptions\ValueInCsvColumnsMustBeString;
+use SoulDoit\DataTable\Exceptions\InvalidDbName;
 use SoulDoit\DataTable\Query;
 use SoulDoit\DataTable\Response;
 use ReflectionMethod;
@@ -78,7 +79,7 @@ class SSP
 
                 array_push($frontend_dt_cols, $e_fe_dt_col);
 
-            } else if (in_array($frontend_framework, ["vuetify", "others"])) {
+            } else {
 
                 if ($frontend_framework == "vuetify") {
                     array_push($frontend_dt_cols, [
@@ -98,6 +99,33 @@ class SSP
         }
 
         return $frontend_dt_cols;
+    }
+
+    public function getFrontEndInitialSorting(string $db, bool $is_sort_desc = false): array
+    {
+        $frontend_framework = $this->getFrontendFramework();
+
+        $arranged_cols_details = $this->getArrangedColsDetails($is_for_csv);
+        $db_cols_final = $arranged_cols_details['db_cols_final'];
+
+        $col_index = array_flip($db_cols_final)[$db] ?? null;
+
+        if ($col_index === null) throw InvalidDbName::create($db);
+
+        if ($frontend_framework == "datatablejs") {
+
+            return [
+                [$col_index, ($is_sort_desc ? 'desc' : 'asc')]
+            ];
+
+        } else {
+
+            return [
+                'by' => $db,
+                'desc' => $is_sort_desc,
+            ];
+
+        }
     }
 
     public function getData(bool $is_for_csv = false): array
