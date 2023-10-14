@@ -173,6 +173,7 @@ class UsersController extends Controller
         $ssp->enableSearch();
         $ssp->allowExportAllItemsInCsv();
         $ssp->setAllowedItemsPerPage([5, 10, 20, -1]);
+        $ssp->setFrontendFramework('datatablejs');
 
         $ssp->setColumns([
             ['label'=>'ID',         'db'=>'id',            'formatter' => function ($value, $model) {
