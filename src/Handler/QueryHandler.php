@@ -101,7 +101,7 @@ class QueryHandler
                 $this->validateRequest([
                     'sortBy' => ['in:' . implode(",", $sortable_cols)],
                     'sortDesc' => ['in:1,0,true,false'],
-                ],[
+                ], [
                     'sortBy.in' => 'Selected sortBy is invalid. Allowed sortBy: ' . implode(",", $sortable_cols),
                     'sortDesc.in' => 'sortDesc must be either 1,0,true or false',
                 ]);
@@ -170,10 +170,11 @@ class QueryHandler
 
         $validation_error_messages = [];
 
-        if (!empty($this->allowed_items_per_page)) {
-            $allowed_items_per_page = $this->handler->ssp->getAllowedItemsPerPage();
+        $allowed_items_per_page = $this->handler->ssp->getAllowedItemsPerPage();
 
+        if (!empty($allowed_items_per_page)) {
             if (is_array($allowed_items_per_page)) {
+
                 $allowed_items_per_page = array_map(function($v){ return intval($v); }, $allowed_items_per_page);
 
                 if ($is_for_csv) {
@@ -192,6 +193,7 @@ class QueryHandler
                     array_push($validation_rules[$firstRequestName], 'filled');
                     array_push($validation_rules[$secondRequestName], 'filled');
                 }
+
             }
         }
 
