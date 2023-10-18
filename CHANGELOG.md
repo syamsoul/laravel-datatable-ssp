@@ -7,6 +7,7 @@ All notable changes to `laravel-datatable-ssp` will be documented in this file
 - New feature: Set frontend settings using chaining method (e.g: `$ssp->frontend()->setResponseDataRouteName('users.data')->setInitialSorting('created_at', true)`)
 - New feature: Get frontend settings via only a single method (e.g: `$ssp->frontend()->getSettings()`)
 - Remove feature: `SSP->setFrontEndFramework()`
+- Remove feature: `SSP->getFrontEndColumns()`
 - Remove feature: `SSP->getFrontEndInitialSorting()`
 
 ## 3.1.0 - 2023-10-14
