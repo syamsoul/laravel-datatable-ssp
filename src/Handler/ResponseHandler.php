@@ -1,23 +1,23 @@
 <?php
 
-namespace SoulDoit\DataTable;
+namespace SoulDoit\DataTable\Handler;
 
-use SoulDoit\DataTable\SSP;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Http\JsonResponse;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use SoulDoit\DataTable\Exceptions\ValueInCsvColumnsMustBeString;
 
-class Response
+class ResponseHandler
 {
     public function __construct(
-        private SSP $ssp
+        private Handler $handler
     ) {}
 
     public function json(): JsonResponse
     {
-        $frontend_framework = $this->ssp->getFrontendFramework();
+        $frontend_framework = $this->handler->frontend()->getFramework();
 
-        $data = $this->ssp->getData();
+        $data = $this->handler->data()->getData();
 
         if ($frontend_framework === 'datatablejs') {
             return response()->json($data);
@@ -61,7 +61,7 @@ class Response
             'Pragma'              => 'public'
         ];
 
-        $query_data = $this->ssp->getData(true);
+        $query_data = $this->handler->data()->getData(true);
 
         //check if value in each columns is string
         foreach ($query_data as $row) {

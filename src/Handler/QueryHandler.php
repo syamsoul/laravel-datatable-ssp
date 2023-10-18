@@ -1,31 +1,32 @@
 <?php
-namespace SoulDoit\DataTable;
+namespace SoulDoit\DataTable\Handler;
 
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Support\Facades\Validator;
+use SoulDoit\DataTable\Exceptions\MustHaveQuery;
 
-trait Query
+class QueryHandler
 {
-    private $dt_query;
-    private $query_count;
+    private $dt_query = null;
+    private $query_count = null;
     private $query_custom_filter;
     private $pagination_data;
 
-    private array|null $allowed_items_per_page = null;
-    private bool $is_search_enable = false;
-    private bool $is_sort_enable = true;
-    private bool $is_count_enable = true;
-    private bool $is_allowed_export_all_items_in_csv = false;
+    public function __construct(
+        private Handler $handler
+    ) {}
 
-    protected function query(array $selected_columns): EloquentBuilder|QueryBuilder
+    public function query(array $selected_columns): EloquentBuilder|QueryBuilder
     {
+        if ($this->dt_query === null) throw MustHaveQuery::create();
+
         return is_callable($this->dt_query) ? ($this->dt_query)($selected_columns) : $this->dt_query;
     }
 
-    protected function queryCount(EloquentBuilder|QueryBuilder $query): int
+    public function queryCount(EloquentBuilder|QueryBuilder $query): int
     {
-        if ($this->query_count == null) {
+        if ($this->query_count === null) {
             if ($query instanceof EloquentBuilder) {
                 if (!empty($query->getQuery()->groups)) return $query->getQuery()->getCountForPagination();
             }
@@ -36,27 +37,39 @@ trait Query
         return is_callable($this->query_count) ? ($this->query_count)($query) : $this->query_count;
     }
 
-    public function setQuery(callable|EloquentBuilder|QueryBuilder $query)
+    public function queryCustomFilter(EloquentBuilder|QueryBuilder $query): void
+    {
+        if (is_callable($this->query_custom_filter)) ($this->query_custom_filter)($query);
+    }
+
+    public function setQuery(callable|EloquentBuilder|QueryBuilder $query): QueryHandler
     {
         $this->dt_query = $query;
 
         return $this;
     }
 
-    public function setQueryCount(callable|int $query_count)
+    public function setQueryCount(callable|int $query_count): QueryHandler
     {
         $this->query_count = $query_count;
 
         return $this;
     }
 
-    private function queryOrder(EloquentBuilder|QueryBuilder $query): void
+    public function setQueryCustomFilter(callable $query_custom_filter): QueryHandler
+    {
+        $this->query_custom_filter = $query_custom_filter;
+
+        return $this;
+    }
+
+    public function queryOrder(EloquentBuilder|QueryBuilder $query): void
     {
         $request = request();
 
-        $frontend_framework = $this->getFrontendFramework();
+        $frontend_framework = $this->handler->frontend()->getFramework();
 
-        $arranged_cols_details = $this->getArrangedColsDetails();
+        $arranged_cols_details = $this->handler->columns()->getArrangedColsDetails();
         $dt_cols = $arranged_cols_details['dt_cols'];
         $db_cols_mid = $arranged_cols_details['db_cols_mid'];
         $db_cols_final = $arranged_cols_details['db_cols_final'];
@@ -65,7 +78,7 @@ trait Query
         $sortable_cols = [];
 
         foreach ($dt_cols as $index => $dt_col) {
-            if ($this->isSortable($dt_col)) $sortable_cols[$index] = $db_cols_final_clean[$index];
+            if ($this->handler->columns()->isSortable($dt_col)) $sortable_cols[$index] = $db_cols_final_clean[$index];
         }
 
         if ($frontend_framework == "datatablejs") {
@@ -107,7 +120,7 @@ trait Query
         }
     }
 
-    private function queryPagination(EloquentBuilder|QueryBuilder $query, bool $is_for_csv = false): void
+    public function queryPagination(EloquentBuilder|QueryBuilder $query, bool $is_for_csv = false): void
     {
         $request = request();
 
@@ -118,7 +131,7 @@ trait Query
         }
     }
 
-    private function getPaginationData(bool $is_for_csv = false)
+    public function getPaginationData(bool $is_for_csv = false)
     {
         if ($this->pagination_data !== null) return $this->pagination_data;
 
@@ -126,7 +139,7 @@ trait Query
 
         $ret = [];
 
-        $frontend_framework = $this->getFrontendFramework();
+        $frontend_framework = $this->handler->frontend()->getFramework();
 
         if ($frontend_framework == "datatablejs") {
 
@@ -158,13 +171,13 @@ trait Query
         $validation_error_messages = [];
 
         if (!empty($this->allowed_items_per_page)) {
-            $allowed_items_per_page = $this->getAllowedItemsPerPage();
+            $allowed_items_per_page = $this->handler->ssp->getAllowedItemsPerPage();
 
             if (is_array($allowed_items_per_page)) {
                 $allowed_items_per_page = array_map(function($v){ return intval($v); }, $allowed_items_per_page);
 
                 if ($is_for_csv) {
-                    if ($this->is_allowed_export_all_items_in_csv) $allowed_items_per_page = array_merge($allowed_items_per_page, [-1]);
+                    if ($this->handler->ssp->isAllowedExportAllItemsInCsv()) $allowed_items_per_page = array_merge($allowed_items_per_page, [-1]);
                 }
 
                 $allowed_items_per_page = array_unique($allowed_items_per_page);
@@ -189,24 +202,12 @@ trait Query
         return $ret;
     }
 
-    protected function queryCustomFilter(EloquentBuilder|QueryBuilder $query): void
-    {
-        if (is_callable($this->query_custom_filter)) ($this->query_custom_filter)($query);
-    }
-
-    public function setQueryCustomFilter(callable $query_custom_filter)
-    {
-        $this->query_custom_filter = $query_custom_filter;
-
-        return $this;
-    }
-
-    private function querySearch(EloquentBuilder|QueryBuilder $query): void
+    public function querySearch(EloquentBuilder|QueryBuilder $query): void
     {
         $search_value = $this->getSearchValue();
 
         if (!empty($search_value)) {
-            $arranged_cols_details = $this->getArrangedColsDetails();
+            $arranged_cols_details = $this->handler->columns()->getArrangedColsDetails();
             $dt_cols = $arranged_cols_details['dt_cols'];
             $db_cols_initial = $arranged_cols_details['db_cols_initial'];
 
@@ -214,7 +215,7 @@ trait Query
                 $count = 0;
                 foreach ($db_cols_initial as $index => $e_col) {
                     if (! ($dt_cols[$index]['searchable'] ?? true)) continue;
-                    if ($this->isDbFake($e_col)) continue;
+                    if ($this->handler->columns()->isDbFake($e_col)) continue;
 
                     if ($count == 0) $the_query->where($e_col, 'LIKE', "%".$search_value."%");
                     else $the_query->orWhere($e_col, 'LIKE', "%".$search_value."%");
@@ -227,10 +228,10 @@ trait Query
 
     private function getSearchValue(): string
     {
-        if (! $this->is_search_enable) return '';
+        if (! $this->handler->ssp->isSearchEnabled()) return '';
 
         $request = request();
-        $frontend_framework = $this->getFrontendFramework();
+        $frontend_framework = $this->handler->frontend()->getFramework();
 
         $search_value = '';
 
@@ -249,66 +250,6 @@ trait Query
         }
 
         return $search_value;
-    }
-
-    public function enableSearch(bool $enable = true)
-    {
-        $this->is_search_enable = $enable;
-
-        return $this;
-    }
-
-    public function disableSorting(bool $disable = true)
-    {
-        $this->is_sort_enable = !$disable;
-
-        return $this;
-    }
-
-    public function disableCount(bool $disable = true)
-    {
-        $this->is_count_enable = !$disable;
-
-        return $this;
-    }
-
-    public function allowExportAllItemsInCsv(bool $allow = true)
-    {
-        $this->is_allowed_export_all_items_in_csv = $allow;
-
-        return $this;
-    }
-
-    public function setAllowedItemsPerPage(int|array $allowed_items_per_page)
-    {
-        $this->allowed_items_per_page = is_numeric($allowed_items_per_page) ? [$allowed_items_per_page] : (is_array($allowed_items_per_page) ? $allowed_items_per_page : null);
-
-        return $this;
-    }
-
-    public function isSearchEnabled(): bool
-    {
-        return $this->is_search_enable;
-    }
-
-    public function isSortingEnabled(): bool
-    {
-        return $this->is_sort_enable;
-    }
-
-    public function isCountEnabled(): bool
-    {
-        return $this->is_count_enable;
-    }
-
-    public function isAllowedExportAllItemsInCsv(): bool
-    {
-        return $this->is_allowed_export_all_items_in_csv;
-    }
-
-    public function getAllowedItemsPerPage(): ?array
-    {
-        return $this->allowed_items_per_page;
     }
 
     private function validateRequest(array $rules, array $error_messages = [])

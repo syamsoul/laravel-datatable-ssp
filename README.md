@@ -34,7 +34,7 @@ You can refer [here (click here)](https://datatables.net/examples/data_sources/s
 &nbsp;
 ## Requirement
 
-* Laravel 8.0 and above
+* Laravel 9.0 and above
 
 
 &nbsp;
@@ -42,7 +42,7 @@ You can refer [here (click here)](https://datatables.net/examples/data_sources/s
 ## Installation
 
 
-This package can be used in Laravel 8.0 or higher. If you are using an older version of Laravel, there's might be some problem. If there's any problem, you can [create new issue](https://github.com/syamsoul/laravel-datatable-ssp/issues) and I will fix it as soon as possible.
+This package can be used in Laravel 9.0 or higher. If you are using an older version of Laravel, there's might be some problem. If there's any problem, you can [create new issue](https://github.com/syamsoul/laravel-datatable-ssp/issues) and I will fix it as soon as possible.
 
 You can install the package via composer:
 
@@ -173,7 +173,7 @@ class UsersController extends Controller
         $ssp->enableSearch();
         $ssp->allowExportAllItemsInCsv();
         $ssp->setAllowedItemsPerPage([5, 10, 20, -1]);
-        $ssp->setFrontendFramework('datatablejs');
+        $ssp->frontend()->setFramework('datatablejs');
 
         $ssp->setColumns([
             ['label'=>'ID',         'db'=>'id',            'formatter' => function ($value, $model) {
@@ -207,14 +207,13 @@ class UsersController extends Controller
     public function page()
     {   
         return view('admin-panel.users-list', [
-            'columns' => $this->ssp->getFrontEndColumns(),
-            'is_search_enable' => $this->ssp->isSearchEnabled(),
-            'allowed_items_per_page' => $this->ssp->getAllowedItemsPerPage(),
-            'initial_items_per_page' => 10,
-            'initial_order' => $this->ssp->getFrontEndInitialSorting('created_at', true),
+            'fe_settings' => $this->ssp->frontend()
+                ->setInitialSorting('created_at', true) // this means `order created_at desc`
+                ->setInitialItemsPerPage(10)
+                ->setResponseDataUrl(route('users.get'))
+                ->getSettings(true),
         ]);
     }
-
 
     public function get()
     {
@@ -234,19 +233,7 @@ class UsersController extends Controller
         <table id="datatable_1" class="table table-striped table-bordered" style="width:100%;"></table>
         <script>
         $(document).ready(function(){
-            $('#datatable_1').DataTable({
-                processing: true,
-                serverSide: true,
-                ajax: '{{ route('users.get') }}',
-                columns: {!! json_encode($columns) !!},
-                lengthMenu: [
-                    {!! json_encode($allowed_items_per_page) !!},
-                    {!! json_encode($allowed_items_per_page) !!}.map(x => (x == -1 ? 'All' : x) ),
-                ],
-                pageLength: {{ $initial_items_per_page }},
-                searching: {{ $is_search_enable ? 'true' : 'false' }},
-                order: {!! json_encode($initial_order) !!},
-            });
+            $('#datatable_1').DataTable({!! $fe_settings !!});
         });
 
         function edit (id) {
