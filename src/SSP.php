@@ -68,35 +68,35 @@ class SSP
         return $this;
     }
 
-    public function enableSearch(bool $enable = true)
+    public function enableSearch(bool $enable = true): SSP
     {
         $this->is_search_enable = $enable;
 
         return $this;
     }
 
-    public function disableSorting(bool $disable = true)
+    public function disableSorting(bool $disable = true): SSP
     {
         $this->is_sort_enable = !$disable;
 
         return $this;
     }
 
-    public function disableCount(bool $disable = true)
+    public function disableCount(bool $disable = true): SSP
     {
         $this->is_count_enable = !$disable;
 
         return $this;
     }
 
-    public function allowExportAllItemsInCsv(bool $allow = true)
+    public function allowExportAllItemsInCsv(bool $allow = true): SSP
     {
         $this->is_allowed_export_all_items_in_csv = $allow;
 
         return $this;
     }
 
-    public function setAllowedItemsPerPage(int|array $allowed_items_per_page)
+    public function setAllowedItemsPerPage(int|array $allowed_items_per_page): SSP
     {
         $this->allowed_items_per_page = is_numeric($allowed_items_per_page) ? [$allowed_items_per_page] : (is_array($allowed_items_per_page) ? $allowed_items_per_page : null);
 

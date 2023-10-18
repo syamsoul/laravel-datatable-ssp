@@ -22,9 +22,9 @@ class FrontendHandler
         return $this;
     }
 
-    public function setResponseDataRouteName(string $route_name): FrontendHandler
+    public function setResponseDataRouteName(string $response_data_route_name): FrontendHandler
     {
-        $this->response_data_url = route($route_name);
+        $this->response_data_url = route($response_data_route_name);
 
         return $this;
     }
@@ -77,7 +77,7 @@ class FrontendHandler
         return $this->framework ?? config('sd-datatable-ssp.frontend_framework', 'others');
     }
 
-    public function getResponseDataUrl(): ?string
+    public function getResponseDataUrl(): string
     {
         return $this->response_data_url;
     }

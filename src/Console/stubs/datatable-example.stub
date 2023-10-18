@@ -48,6 +48,7 @@ final class {{ class }} extends SSP
     }
 
     // This is optional. This method can be used to customize count query. You can remove this method if want to use default count query.
+    // Recommended to use default count query.
     // protected function queryCount($query): int
     // {
     //     return $query->count();

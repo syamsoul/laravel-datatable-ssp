@@ -18,7 +18,7 @@ class ColumnsHandler
         private Handler $handler
     ) {}
 
-    public function setColumns(array $columns)
+    public function setColumns(array $columns): ColumnsHandler
     {
         $this->dt_columns = $columns;
 
