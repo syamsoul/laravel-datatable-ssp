@@ -110,6 +110,8 @@ class FrontendHandler
                 ],
                 'pageLength' => $this->getInitialItemsPerPage(),
                 'searching' => $this->handler->ssp->isSearchEnabled(),
+                'pagingType' => $this->handler->ssp->isCountEnabled() ? 'simple_numbers' : 'simple',
+                'info' => $this->handler->ssp->isCountEnabled(),
                 'order' => $this->getInitialSorting(),
             ];
         } else {

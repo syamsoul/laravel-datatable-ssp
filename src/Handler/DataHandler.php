@@ -85,6 +85,10 @@ class DataHandler
             if ($this->handler->ssp->isCountEnabled()) {
                 $ret['recordsTotal'] = $query_count;
                 $ret['recordsFiltered'] = $query_filtered_count;
+            } else {
+                // TEMP: current workaround if count disabled
+                $paged_data_count = count($ret['data']);
+                $ret['recordsTotal'] = $ret['recordsFiltered'] = $paged_data_count < $request->length ? ($request->start + $paged_data_count) : pow(10, 9);
             }
 
         } else if (in_array($frontend_framework, ["vuetify", "others"])) {
