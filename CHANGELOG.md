@@ -3,7 +3,7 @@
 All notable changes to `laravel-datatable-ssp` will be documented in this file
 
 ## 3.2.5 - 2023-10-19
-- New feature: Disable fetch on init (only applied to `others` framework) on frontend (e.g: `$ssp->frontend()->disableFetchOnInit()`)
+- New feature: Can disable fetch on init (only applied to `others` framework) on frontend (e.g: `$ssp->frontend()->disableFetchOnInit()`)
 
 ## 3.2.4 - 2023-10-19
 - Refactoring (separate into a few Handler)
