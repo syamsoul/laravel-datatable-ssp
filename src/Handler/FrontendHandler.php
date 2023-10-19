@@ -7,9 +7,10 @@ use SoulDoit\DataTable\Exceptions\InvalidDbName;
 class FrontendHandler
 {
     private ?string $framework = null;
+    private ?string $response_data_url = null;
     private ?int $initial_items_per_page = null;
     private array $initial_sorting = [];
-    private ?string $response_data_url = null;
+    private bool $is_fetch_on_init = true;
 
     public function __construct(
         private Handler $handler
@@ -72,6 +73,13 @@ class FrontendHandler
         return $this;
     }
 
+    public function disableFetchOnInit(bool $disable = true): FrontendHandler
+    {
+        $this->is_fetch_on_init = !$disable;
+
+        return $this;
+    }
+
     public function getFramework(): string
     {
         return $this->framework ?? config('sd-datatable-ssp.frontend_framework', 'others');
@@ -90,6 +98,11 @@ class FrontendHandler
     public function getInitialSorting(): array
     {
         return $this->initial_sorting ?? [];
+    }
+
+    public function isFetchOnInit(): bool
+    {
+        return $this->is_fetch_on_init;
     }
 
     public function getSettings(bool $is_return_json_string = false): array|string
@@ -124,6 +137,7 @@ class FrontendHandler
                 'url' => $this->getResponseDataUrl(),
                 'is_search_enable' => $this->handler->ssp->isSearchEnabled(),
                 'is_count_enable' => $this->handler->ssp->isCountEnabled(),
+                'is_fetch_on_init' => $this->isFetchOnInit(),
                 'defaultItemsPerPage' => $this->getInitialItemsPerPage(),
             ];
 
