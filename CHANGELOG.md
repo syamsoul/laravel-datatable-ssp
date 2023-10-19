@@ -2,7 +2,7 @@
 
 All notable changes to `laravel-datatable-ssp` will be documented in this file
 
-## 3.2.7 - 2023-10-19
+## 3.2.6 - 2023-10-19
 - New feature: Replace with `SSP->frontend()->setResponseDataRoute($route_name, $parameters = [], $absolute = true)`
 - Remove feature: `SSP->frontend()->setResponseDataRouteName($route_name)`
 
