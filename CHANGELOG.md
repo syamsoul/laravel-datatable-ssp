@@ -2,6 +2,10 @@
 
 All notable changes to `laravel-datatable-ssp` will be documented in this file
 
+## 3.2.7 - 2023-10-19
+- New feature: Replace with `SSP->frontend()->setResponseDataRoute($route_name, $parameters = [], $absolute = true)`
+- Remove feature: `SSP->frontend()->setResponseDataRouteName($route_name)`
+
 ## 3.2.5 - 2023-10-19
 - New feature: Can disable fetch on init (only applied to `others` framework) on frontend (e.g: `$ssp->frontend()->disableFetchOnInit()`)
 
