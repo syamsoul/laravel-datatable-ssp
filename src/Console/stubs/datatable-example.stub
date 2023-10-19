@@ -15,6 +15,7 @@ final class {{ class }} extends SSP
         // $this->disableCount();
         // $this->allowExportAllItemsInCsv();
         // $this->setAllowedItemsPerPage([5, 10, 20]);
+        // $this->frontend()->setFramework('others');
     }
 
     protected function columns(): array
