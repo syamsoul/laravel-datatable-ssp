@@ -23,16 +23,16 @@ class FrontendHandler
         return $this;
     }
 
-    public function setResponseDataRouteName(string $response_data_route_name): FrontendHandler
+    public function setResponseDataRoute(string $route_name, mixed $parameters = [], bool|null $absolute = true): FrontendHandler
     {
-        $this->response_data_url = route($response_data_route_name);
+        $this->response_data_url = route($route_name, $parameters, $absolute);
 
         return $this;
     }
 
-    public function setResponseDataUrl(string $response_data_url): FrontendHandler
+    public function setResponseDataUrl(string $url): FrontendHandler
     {
-        $this->response_data_url = $response_data_url;
+        $this->response_data_url = $url;
 
         return $this;
     }
