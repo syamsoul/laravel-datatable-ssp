@@ -117,16 +117,21 @@ class FrontendHandler
                 'serverSide' => true,
                 'ajax' => $this->getResponseDataUrl(),
                 'columns' => $this->getColumns(),
-                'lengthMenu' => [
-                    $this->handler->ssp->getAllowedItemsPerPage(),
-                    array_map(fn ($v) => ($v == -1 ? 'All' : $v), $this->handler->ssp->getAllowedItemsPerPage()),
-                ],
                 'pageLength' => $this->getInitialItemsPerPage(),
                 'searching' => $this->handler->ssp->isSearchEnabled(),
                 'pagingType' => $this->handler->ssp->isCountEnabled() ? 'simple_numbers' : 'simple',
                 'info' => $this->handler->ssp->isCountEnabled(),
                 'order' => $this->getInitialSorting(),
             ];
+
+            $allowItemsPerPage = $this->handler->ssp->getAllowedItemsPerPage();
+
+            if (is_array($allowItemsPerPage)) {
+                $data['lengthMenu'] = [
+                    $allowItemsPerPage,
+                    array_map(fn ($v) => ($v == -1 ? 'All' : $v), $allowItemsPerPage),
+                ];
+            }
         } else {
             $initial_sorting = $this->getInitialSorting();
 
