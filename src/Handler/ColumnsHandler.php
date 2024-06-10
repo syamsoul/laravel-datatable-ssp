@@ -128,8 +128,20 @@ class ColumnsHandler
 
     private function getDtColDbArray(string|Expression $db_col, bool $is_db_raw): array
     {
+        $alias_separator = " as ";
+
         $db_col = $is_db_raw ? $this->getRawExpressionValue($db_col) : $db_col;
 
-        return explode(" as ", preg_replace("/ as /i", " as ", $db_col));
+        $db_col_arr = explode($alias_separator, preg_replace("/$alias_separator/i", $alias_separator, $db_col));
+
+        if (count($db_col_arr) <= 2) return $db_col_arr;
+
+        $real_alias_expression = $db_col_arr[count($db_col_arr)-1];
+        $real_alias_expression_length = strlen($alias_separator . $real_alias_expression);
+
+        return [
+            substr($db_col, 0, ($real_alias_expression_length * -1)),
+            $real_alias_expression,
+        ];
     }
 }
