@@ -260,17 +260,6 @@ class QueryHandler
 
         $validator = Validator::make($request->all(), $rules, $error_messages);
 
-        if ($validator->fails()) {
-            if ($request->expectsJson()) {
-                $errors = $validator->errors();
-
-                abort(response()->json([
-                    'message' => $errors->first(),
-                    'errors' => $errors->toArray(),
-                ], 403));
-            } else {
-                abort(422, $validator->messages()->first());
-            }
-        }
+        $validator->validate();
     }
 }
