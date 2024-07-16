@@ -4,6 +4,7 @@ return [
     'export_to_csv' => [
         'is_cache_lock_enable' => false,
         'is_cache_lock_based_on_auth' => true,
+        'timeout' => 600,
     ],
     'default_modifier_timezone' => 'UTC', // NOTE: used in DateTimeModifier
 ];

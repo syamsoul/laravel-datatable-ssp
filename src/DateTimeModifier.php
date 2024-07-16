@@ -23,7 +23,7 @@ class DateTimeModifier
         self::$timezone = $timezone;
     }
 
-    public static function getTimezone() : string
+    public static function getTimezone(): string
     {
         return self::$timezone;
     }

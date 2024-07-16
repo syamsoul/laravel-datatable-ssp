@@ -32,6 +32,7 @@ class ResponseHandler
     public function csv(): StreamedResponse
     {
         $is_cache_lock_enable = config('sd-datatable-ssp.export_to_csv.is_cache_lock_enable', false);
+        $timeout = config('sd-datatable-ssp.export_to_csv.timeout', 600);
 
         if ($is_cache_lock_enable) {
             $lock_name = 'export-csv-'.request()->route()->getName();
@@ -61,25 +62,27 @@ class ResponseHandler
             'Pragma'              => 'public'
         ];
 
-        $query_data = $this->handler->data()->getData(true);
+        ini_set('max_execution_time', $timeout);
 
-        //check if value in each columns is string
-        foreach ($query_data as $row) {
-            foreach ($row as $e_col) {
-                if (!is_string($e_col) && !is_numeric($e_col) && $e_col !== null) {
-                    if ($is_cache_lock_enable) $lock->release();
-                    throw ValueInCsvColumnsMustBeString::create(json_encode($e_col));
-                }
-            }
-        }
-
-        $callback = function() use($query_data) {
+        $callback = function () use ($is_cache_lock_enable, &$lock) {
             $file = fopen('php://output', 'w');
-            foreach ($query_data as $row) fputcsv($file, $row);
-            fclose($file);
-        };
 
-        if ($is_cache_lock_enable) $lock->release();
+            $this->handler->data()->getData(true, function ($query_data) use (&$file, $is_cache_lock_enable, &$lock) {
+                foreach ($query_data as $row) {
+                    foreach ($row as $e_col) {
+                        if (!is_string($e_col) && !is_numeric($e_col) && $e_col !== null) {
+                            if ($is_cache_lock_enable) $lock->release();
+                            throw ValueInCsvColumnsMustBeString::create(json_encode($e_col));
+                        }
+                    }
+                    fputcsv($file, $row);
+                }
+            });
+
+            fclose($file);
+
+            if ($is_cache_lock_enable) $lock->release();
+        };
 
         return response()->stream($callback, 200, $headers);
     }
