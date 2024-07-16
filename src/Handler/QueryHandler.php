@@ -114,7 +114,7 @@ class QueryHandler
 
                 $col_index = array_flip($db_cols_final)[$request->sortBy];
 
-                $query->orderBy($db_cols_mid[$col_index], ($sortDesc ? 'desc':'asc'));
+                $query->orderBy($db_cols_mid[$col_index], ($sortDesc ? 'desc' : 'asc'));
             }
 
         }

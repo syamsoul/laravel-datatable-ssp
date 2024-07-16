@@ -36,7 +36,7 @@ class ColumnsHandler
         }, ($this->handler->ssp->callColumns() ?? $this->dt_columns));
     }
 
-    public function getArrangedColsDetails(bool $is_for_csv = false) : array
+    public function getArrangedColsDetails(bool $is_for_csv = false): array
     {
         if (! $is_for_csv) {
             if ($this->arranged_cols_details !== null) return $this->arranged_cols_details;
