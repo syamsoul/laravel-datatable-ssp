@@ -29,10 +29,11 @@ class ResponseHandler
         }
     }
 
-    public function csv(): StreamedResponse
+    public function csv(?string $filename = null, bool $is_include_datetime_in_filename = true): StreamedResponse
     {
         $is_cache_lock_enable = config('sd-datatable-ssp.export_to_csv.is_cache_lock_enable', false);
         $timeout = config('sd-datatable-ssp.export_to_csv.timeout', 600);
+        $filename_prefix = config('sd-datatable-ssp.export_to_csv.filename_prefix', '');
 
         if ($is_cache_lock_enable) {
             $lock_name = 'export-csv-'.request()->route()->getName();
@@ -57,7 +58,7 @@ class ResponseHandler
         $headers = [
             'Cache-Control'       => 'must-revalidate, post-check=0, pre-check=0',
             'Content-type'        => 'text/csv',
-            'Content-Disposition' => 'attachment; filename='.strtr(request()->route()->getName(), ".", "-") ."-".now()->format("YmdHis").'.csv',
+            'Content-Disposition' => 'attachment; filename=' . preg_replace('/-+/', '-', str_replace(".", "-", (empty($filename_prefix) ? '' : "$filename_prefix-") . ($filename ?? request()->route()->getName())) . ($is_include_datetime_in_filename ? ("-" . now()->format("YmdHis")) : '')) . '.csv',
             'Expires'             => '0',
             'Pragma'              => 'public'
         ];
