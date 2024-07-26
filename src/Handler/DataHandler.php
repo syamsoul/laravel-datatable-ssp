@@ -108,6 +108,7 @@ class DataHandler
                         'current_item_position_start' => $current_item_position_start,
                         'current_item_position_end' => $current_item_position_end,
                         'current_page_item_count' => $current_page_item_count,
+                        'items_per_page' => $pagination_data['items_per_page'],
                     ]);
                 }
 
