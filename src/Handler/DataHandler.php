@@ -92,13 +92,13 @@ class DataHandler
                     $paged_data_count = count($ret['data']);
                     $ret['recordsTotal'] = $ret['recordsFiltered'] = $paged_data_count < $request->length ? ($request->start + $paged_data_count) : pow(10, 9);
                 }
-    
+
             } else if (in_array($frontend_framework, ["vuetify", "others"])) {
-    
+
                 $ret = [];
-    
+
                 $pagination_data = $this->handler->query()->getPaginationData();
-    
+
                 if (!empty($pagination_data)) {
                     $current_page_item_count = count($query_data);
                     $current_item_position_start = $current_page_item_count == 0 ? 0 : ($pagination_data['offset'] + 1);
@@ -110,15 +110,19 @@ class DataHandler
                         'current_page_item_count' => $current_page_item_count,
                     ]);
                 }
-    
+
                 if ($this->handler->ssp->isCountEnabled()) {
                     $ret['total_item_count'] = $query_count;
                     $ret['total_filtered_item_count'] = $query_filtered_count;
+                    if (!empty($pagination_data)) {
+                        $ret['current_page'] = $pagination_data['current_page'];
+                        $ret['total_pages'] = intval(ceil($ret['total_filtered_item_count'] / $pagination_data['items_per_page']));
+                    }
                 }
-    
+
                 $ret['items'] = $query_data;
             }
-    
+
             return $ret;
         };
 

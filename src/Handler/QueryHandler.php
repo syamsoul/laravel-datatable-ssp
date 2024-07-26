@@ -147,8 +147,9 @@ class QueryHandler
             $secondRequestName = 'length';
 
             if ($request->filled('length') && $request->filled('start')) {
-                $ret['items_per_page'] = $request->length;
-                $ret['offset'] = $request->start;
+                $ret['items_per_page'] = intval($request->length);
+                $ret['offset'] = intval($request->start);
+                $ret['current_page'] = intval(floor(($ret['offset'] / $ret['items_per_page']) + 1));
             }
 
         } else if (in_array($frontend_framework, ["vuetify", "others"])) {
@@ -157,8 +158,9 @@ class QueryHandler
             $secondRequestName = 'itemsPerPage';
 
             if ($request->filled('itemsPerPage') && $request->filled('page')) {
-                $ret['items_per_page'] = $request->itemsPerPage;
-                $ret['offset'] = ($request->page - 1) * $request->itemsPerPage;
+                $ret['items_per_page'] = intval($request->itemsPerPage);
+                $ret['offset'] = intval(($request->page - 1) * $request->itemsPerPage);
+                $ret['current_page'] = intval($request->page);
             }
 
         }
