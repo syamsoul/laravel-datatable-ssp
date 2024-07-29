@@ -13,11 +13,14 @@ class ResponseHandler
         private Handler $handler
     ) {}
 
-    public function json(): JsonResponse
+    public function json(int $cache_timeout = 0, string $extend_cache_name = ''): JsonResponse
     {
+        $full_cache_name = 'SYAMSOUL_DATATABLE_SSP_'. request()->fullUrl();
+        if (!empty($extend_cache_name)) $full_cache_name .= "_$extend_cache_name";
+
         $frontend_framework = $this->handler->frontend()->getFramework();
 
-        $data = $this->handler->data()->getData();
+        $data = Cache::remember(hash('sha256', $full_cache_name), $cache_timeout, fn () => $this->handler->data()->getData());
 
         if ($frontend_framework === 'datatablejs') {
             return response()->json($data);
