@@ -213,13 +213,13 @@ class QueryHandler
         if (!empty($search_value)) {
             $arranged_cols_details = $this->handler->columns()->getArrangedColsDetails();
             $dt_cols = $arranged_cols_details['dt_cols'];
-            $db_cols_initial = $arranged_cols_details['db_cols_initial'];
+            $db_cols_for_search = $arranged_cols_details['db_cols_for_search'];
 
-            $query->where(function ($the_query) use ($dt_cols, $db_cols_initial, $search_value) {
+            $query->where(function ($the_query) use ($dt_cols, $db_cols_for_search, $search_value) {
                 $count = 0;
-                foreach ($db_cols_initial as $index => $e_col) {
+                foreach ($db_cols_for_search as $index => $e_col) {
+                    if (empty($e_col)) continue;
                     if (! ($dt_cols[$index]['searchable'] ?? true)) continue;
-                    if ($this->handler->columns()->isDbFake($e_col)) continue;
 
                     if ($count == 0) $the_query->where($e_col, 'LIKE', "%".$search_value."%");
                     else $the_query->orWhere($e_col, 'LIKE', "%".$search_value."%");
