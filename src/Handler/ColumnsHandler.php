@@ -44,7 +44,7 @@ class ColumnsHandler
 
         $dt_cols = $this->getColumns();
 
-        $db_cols = $db_cols_initial = $db_cols_mid = $db_cols_final = $db_cols_final_clean = $formatter = [];
+        $db_cols = $db_cols_initial = $db_cols_mid = $db_cols_final = $db_cols_final_clean = $db_cols_for_search = $formatter = [];
 
         foreach ($dt_cols as $key => $dt_col) {
             if (isset($dt_col['db'])) {
@@ -71,11 +71,18 @@ class ColumnsHandler
                 }
 
                 $db_cols_final_clean[$key] = $db_cols_final[$key];
+
+                if (isset($dt_col['db_for_search'])) {
+                    $db_cols_for_search[$key] = $dt_col['db_for_search'];
+                } else {
+                    $db_cols_for_search[$key] = $db_cols_initial[$key];
+                }
             } else if (isset($dt_col['db_fake'])) {
                 $db_cols_initial[$key] = $dt_col['db_fake'] . $this->db_fake_identifier;
                 $db_cols_mid[$key] = $dt_col['db_fake'] . $this->db_fake_identifier;
                 $db_cols_final[$key] = $dt_col['db_fake'] . $this->db_fake_identifier;
                 $db_cols_final_clean[$key] = $dt_col['db_fake'];
+                $db_cols_for_search[$key] = null;
             }
 
             if (isset($dt_col['formatter'])) $formatter[$key] = $dt_col['formatter'];
@@ -92,6 +99,7 @@ class ColumnsHandler
             'db_cols_mid' => $db_cols_mid,
             'db_cols_final' => $db_cols_final,
             'db_cols_final_clean' => $db_cols_final_clean,
+            'db_cols_for_search' => $db_cols_for_search,
             'formatter' => $formatter,
         ];
 
@@ -110,7 +118,11 @@ class ColumnsHandler
 
     public function isDbFake($db_col): bool
     {
-        return strpos($db_col, $this->db_fake_identifier) !== false;
+        if (is_string($db_col)) {
+            return strpos($db_col, $this->db_fake_identifier) !== false;
+        }
+
+        return false;
     }
 
     public function getDtLabel(array $dt_col, string $db_col): string
