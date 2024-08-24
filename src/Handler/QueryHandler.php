@@ -122,12 +122,12 @@ class QueryHandler
 
     public function queryPagination(EloquentBuilder|QueryBuilder $query, bool $is_for_csv = false): void
     {
-        $request = request();
-
         $pagination_data = $this->getPaginationData($is_for_csv);
 
         if (isset($pagination_data['items_per_page']) && isset($pagination_data['offset'])) {
-            if ($pagination_data['items_per_page'] != "-1") $query->limit($pagination_data['items_per_page'])->offset($pagination_data['offset']);
+            if ($pagination_data['items_per_page'] === -1) {
+                if ($pagination_data['current_page'] > 1) $query->limit(0);
+            } else $query->limit($pagination_data['items_per_page'])->offset($pagination_data['offset']);
         }
     }
 
