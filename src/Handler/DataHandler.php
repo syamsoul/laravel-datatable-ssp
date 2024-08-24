@@ -117,7 +117,7 @@ class DataHandler
                     $ret['total_filtered_item_count'] = $query_filtered_count;
                     if (!empty($pagination_data)) {
                         $ret['current_page'] = $pagination_data['current_page'];
-                        $ret['total_pages'] = intval(ceil($ret['total_filtered_item_count'] / $pagination_data['items_per_page']));
+                        $ret['total_pages'] = $pagination_data['items_per_page'] < 0 ? 1 : intval(ceil($ret['total_filtered_item_count'] / $pagination_data['items_per_page']));
                     }
                 }
 
