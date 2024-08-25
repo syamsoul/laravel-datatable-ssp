@@ -20,7 +20,11 @@ class ResponseHandler
 
         $frontend_framework = $this->handler->frontend()->getFramework();
 
-        $data = Cache::remember(hash('sha256', $full_cache_name), $cache_timeout, fn () => $this->handler->data()->getData());
+        if ($cache_timeout > 0) {
+            $data = Cache::remember(hash('sha256', $full_cache_name), $cache_timeout, fn () => $this->handler->data()->getData());
+        } else {
+            $data = $this->handler->data()->getData();
+        }
 
         if ($frontend_framework === 'datatablejs') {
             return response()->json($data);
