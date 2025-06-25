@@ -3,7 +3,10 @@
 
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/syamsoul/laravel-datatable-ssp.svg?style=flat-square)](https://packagist.org/packages/syamsoul/laravel-datatable-ssp)
-
+[![Total Downloads](https://img.shields.io/packagist/dt/syamsoul/laravel-datatable-ssp.svg?style=flat-square)](https://packagist.org/packages/syamsoul/laravel-datatable-ssp)
+[![License](https://img.shields.io/github/license/syamsoul/laravel-datatable-ssp.svg?style=flat-square)](LICENSE)
+[![Laravel](https://img.shields.io/badge/Laravel-10.x%2B-red.svg?style=flat-square)](https://laravel.com)
+[![PHP](https://img.shields.io/badge/PHP-8.0%2B-blue.svg?style=flat-square)](https://php.net)
 
 ## Documentation, Installation and Usage Instructions
 
